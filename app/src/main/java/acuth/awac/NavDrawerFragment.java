@@ -64,18 +64,24 @@ public class NavDrawerFragment extends Fragment {
         return mDrawerListView;
     }
 
+    public void lock(boolean locked) {
+        System.out.println("NavDrawerFragment.lock("+locked+")");
+        mDrawerLayout.setDrawerLockMode(locked?DrawerLayout.LOCK_MODE_LOCKED_CLOSED:DrawerLayout.LOCK_MODE_UNLOCKED);
+    }
+
     public void addItem(ActionItem item) {
-        if (mNavDrawerItems.contains(item)) return;
-        mNavDrawerItems.add(item);
-        updateAdapter();
-        if (mNavDrawerItems.size() > 0) mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+        if (item != null && !mNavDrawerItems.contains(item)) {
+            System.out.println("NavDrawerFragment.addItem("+item+")");
+            mNavDrawerItems.add(item);
+            updateAdapter();
+        }
     }
 
     public void init(int fragmentId, DrawerLayout drawerLayout) {
         mFragmentContainerView = getActivity().findViewById(fragmentId);
         mDrawerLayout = drawerLayout;
         mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
-        if (mNavDrawerItems.size() == 0) mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+        lock(true);
     }
 
     private void selectItem(int position) {
@@ -86,6 +92,15 @@ public class NavDrawerFragment extends Fragment {
             String label = mAdapter.getItem(position);
             String action = getActionFromLabel(label);
             if (action != null) mAwac.onAction(action);
+        }
+    }
+
+    void toggle() {
+        if (mDrawerLayout.isDrawerOpen(mFragmentContainerView)) {
+            mDrawerLayout.closeDrawer(mFragmentContainerView);
+        }
+        else {
+            mDrawerLayout.openDrawer(mFragmentContainerView);
         }
     }
 

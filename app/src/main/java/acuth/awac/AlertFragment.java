@@ -51,12 +51,12 @@ public class AlertFragment extends DialogFragment {
         builder.setMessage(mMsg)
                 .setPositiveButton(mOKLabel, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        mAwac.onAction(mAction+":"+mOKAction);
+                        mAwac.onDialogResult(true);
                     }
                 })
                 .setNegativeButton(mCancelLabel, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        mAwac.onAction(mAction+":"+mCancelAction);
+                        mAwac.onDialogResult(false);
                     }
                 });
         return builder.create();
@@ -67,7 +67,7 @@ public class AlertFragment extends DialogFragment {
      * Cope with the case the user cancels the dialog by clicking outside it
      */
     public void onCancel(DialogInterface dialog) {
-        mAwac.onAction(mAction+":"+mCancelAction);
+        mAwac.onDialogResult(false);
         super.onCancel(dialog);
     }
 }

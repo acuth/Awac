@@ -1,5 +1,7 @@
 package acuth.awac;
 
+import org.json.JSONObject;
+
 /**
  * Created by adrian on 02/03/15.
  */
@@ -27,5 +29,16 @@ public class ActionItem {
     public int hashCode() {
         String s = mLabel+":"+mAction;
         return s.hashCode();
+    }
+
+    static ActionItem fromJson(String jsonStr) {
+        try {
+            JSONObject jsonObj = new JSONObject(jsonStr);
+            String label = jsonObj.getString("label");
+            String action = jsonObj.getString("action");
+            return new ActionItem(label,action);
+        } catch (Exception ex) {
+            return null;
+        }
     }
 }
