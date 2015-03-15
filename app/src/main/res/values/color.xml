@@ -4,4 +4,9 @@
     <color name="primary_dark">#ff00695c</color>
     <color name="accent">#ff00ffff</color>
     <color name="text_primary">#ffffffff</color>
+
+    <color name="mam_primary">#ff8fb1b1</color>
+    <color name="mam_primary_dark">#ff000000</color>
+    <color name="mam_accent">#ff00ffff</color>
+    <color name="mam_text_primary">#ff2e555b</color>
 </resources>

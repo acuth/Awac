@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <integer name="app_anim_time">240</integer>
+    <string name="app_url">http://acuth.github.io/test/index.html</string>
 </resources>

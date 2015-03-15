@@ -1,6 +1,6 @@
 <android.support.v4.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
                                               xmlns:tools="http://schemas.android.com/tools"
-                                              android:id="@+id/web_layout"
+                                              android:id="@+id/swipe_layout"
                                               android:layout_width="match_parent"
                                               android:layout_height="match_parent"
                                               android:padding="0dp"
@@ -21,7 +21,9 @@
 
     <WebView
         android:id="@+id/web_view"
-        android:layout_width="wrap_content"
+        android:layout_margin="0dp"
+        android:visibility="invisible"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"/>
 
 </android.support.v4.widget.SwipeRefreshLayout>
