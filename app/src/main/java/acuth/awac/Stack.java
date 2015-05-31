@@ -10,11 +10,12 @@ public class Stack {
     private List<Frame> mFrames;
 
     Stack() {
-        mFrames = new ArrayList<Frame>();
+        mFrames = new ArrayList<>();
     }
 
     Frame peek() {
-        return mFrames.get(mFrames.size()-1);
+        int n = mFrames.size();
+        return n == 0 ? null : mFrames.get(n-1);
     }
 
     void clear() {

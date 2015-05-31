@@ -8,21 +8,25 @@ import java.util.List;
  */
 public class Frame {
     final Awac mAwac;
+    final boolean mDebug = false;
     final String mTag;
     final String mUrl;
+    final boolean mReload;
+    final String mValue;
     final WebViewFragment mWebViewFrag;
-    final List<ActionItem> mOptionsMenuItems = new ArrayList<ActionItem>();
-    final List<ActionItem> mActionBarItems = new ArrayList<ActionItem>();
+    final List<ActionItem> mOptionsMenuItems = new ArrayList<>();
+    final List<ActionItem> mActionBarItems = new ArrayList<>();
 
     private boolean mNavDrawerLocked = true;
     private String mTitle = null;
 
-    Frame(Awac awac,String tag,String url) {
+    Frame(Awac awac,String tag,String url,boolean reload,String value) {
         mAwac = awac;
         mTag = tag;
         mUrl = url;
-        mWebViewFrag = new WebViewFragment();
-        mWebViewFrag.init(this,url);
+        mReload = reload;
+        mValue = value;
+        mWebViewFrag = WebViewFragment.get(this, mUrl, mReload);
     }
 
     public String toString() {
@@ -30,13 +34,13 @@ public class Frame {
     }
 
     void setTitle(String title) {
-        System.out.println("Frame.setTitle("+title+")");
+        if (mDebug) System.out.println("Frame.setTitle("+title+")");
         mTitle = title;
         if (mWebViewFrag.mPageStarted) mAwac.setTitle(title);
     }
 
     void setNavDrawerLocked(boolean locked) {
-        System.out.println("Frame.setNavDrawerLocked("+locked+")");
+        if (mDebug) System.out.println("Frame.setNavDrawerLocked("+locked+")");
         mNavDrawerLocked = locked;
         if (mWebViewFrag.mPageStarted) mAwac.setNavDrawerLocked(locked);
     }
@@ -51,14 +55,14 @@ public class Frame {
 
     void addActionBarItem(ActionItem item) {
         if (item != null && !mActionBarItems.contains(item)) {
-            System.out.println("Frame.addActionBarItem("+item+")");
+            if (mDebug) System.out.println("Frame.addActionBarItem("+item+")");
             mActionBarItems.add(item);
         }
     }
 
     void addOptionsMenuItem(ActionItem item) {
         if (item != null && !mOptionsMenuItems.contains(item)) {
-            System.out.println("Frame.addOptionsMenuItem("+item+")");
+            if (mDebug) System.out.println("Frame.addOptionsMenuItem("+item+")");
             mOptionsMenuItems.add(item);
         }
     }

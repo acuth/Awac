@@ -1,5 +1,6 @@
 package acuth.awac;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -9,15 +10,16 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AlphaAnimation;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by adrian on 28/02/15.
  */
 public class WebViewFragment extends Fragment implements Handler.Callback, SwipeRefreshLayout.OnRefreshListener {
-    private static final boolean DEBUG = true;
     private static final String LOCAL_STORE = "acuth.awac.LocalStore";
 
     private static final int START_PAGE = 2;
@@ -27,13 +29,43 @@ public class WebViewFragment extends Fragment implements Handler.Callback, Swipe
     private static final int END_REFRESH = 6;
     private static final int ENABLE_REFRESH = 7;
     private static final int NEW_APP = 8;
+    private static final int NEXT_PAGE = 9;
+    private static final int PREV_PAGE = 10;
 
+    private static int cIndex = 0;
+    private static List<WebViewFragment> cFragments = new ArrayList<>();
+
+    public static WebViewFragment get(Frame frame, String url, boolean reload) {
+        WebViewFragment f;
+        if (cFragments.isEmpty()) {
+            f = new WebViewFragment();
+            f.mIndex = cIndex++;
+            f.log("- new");
+        }
+        else {
+            f = cFragments.get(0);
+            cFragments.remove(f);
+            f.log("- reuse");
+        }
+        f.init(frame,url,reload);
+        return f;
+    }
+
+    public static void put(WebViewFragment f) {
+        f.log("- retire");
+        //cFragments.add(f);
+    }
+
+
+    private boolean mDebug = true;
+    public int mIndex;
     private View mRootView;
     private String mUrl;
-
+    private boolean mReload;
+    private boolean mUrlLoaded;
     private Frame mFrame;
     private SwipeRefreshLayout mSwipeLayout = null;
-    private WebView mWebView = null;
+    WebView mWebView = null;
     private Handler mHandler = null;
     private String mVarName = null;
     boolean mPageStarted = false;
@@ -41,22 +73,88 @@ public class WebViewFragment extends Fragment implements Handler.Callback, Swipe
     private boolean mGotOnRefreshCB = false;
     private boolean mGotOnActionCB = false;
     private boolean mGotOnPageCloseCB = false;
+    private long mInitTime = -1L;
 
     public WebViewFragment() {
     }
 
+    private void log(String msg) {
+        String timeStr = (mInitTime > 0L) ? " ["+(System.currentTimeMillis()- mInitTime)+"ms]" : "";
+        System.out.println("!!!!!!!! WebViewFragment["+mIndex+"] "+msg+timeStr);
+    }
 
+    private void init(Frame frame,String url,boolean reload) {
+        log("init(url="+url+")");
+
+        mFrame = frame;
+        mUrl = url;
+        mReload = reload;
+        mUrlLoaded = false;
+        mPageStarted = false;
+        mVarName = null;
+        mGotOnBackPressedCB = false;
+        mGotOnRefreshCB = false;
+        mGotOnActionCB = false;
+        mGotOnPageCloseCB = false;
+
+        mInitTime = System.currentTimeMillis();
+    }
+
+    /*public void loadUrl() {
+        if (mUrlLoaded) return;
+        String url = mUrl;
+        if ((url.startsWith("http://") || url.startsWith("https://")) && mReload) {
+            url += (url.indexOf("?") == -1 ? "?" : "&") + "rnd="+Math.random();
+        }
+        mWebView.loadUrl(url);
+        mUrlLoaded = true;
+        log("- load url "+mUrl);
+    }*/
+
+    void invalidate() {
+        mWebView.invalidate();
+        mSwipeLayout.invalidate();
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        log("onAttach()");
+    }
+
+    @Override
+    public void onDetach() {
+        log("onDetach()");
+        mRootView = null;
+        super.onDetach();
+    }
+
+    /*
+    @Override
+    public void onStart() {
+        //log(".onStart()");
+        super.onStart();
+    }
+
+    @Override
+    public void onStop() {
+        //log(".onStop()");
+        super.onStop();
+    }*/
+
+    @Override
+    public void onDestroyView() {
+        log("onDestroyView()");
+        super.onDestroyView();
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        System.out.println("WebViewFragment.onCreateView()");
+        log("onCreateView()");
 
         if (mRootView == null) {
             mRootView = inflater.inflate(R.layout.web_view_fragment, container, false);
-            System.out.println(" - mRootView=" + mRootView);
-
             mWebView = (WebView) mRootView.findViewById(R.id.web_view);
-            System.out.println(" - mWebView=" + mWebView);
 
             mHandler = new Handler(this);
             mSwipeLayout = (SwipeRefreshLayout) mRootView.findViewById(R.id.swipe_layout);
@@ -66,49 +164,78 @@ public class WebViewFragment extends Fragment implements Handler.Callback, Swipe
             mWebView.addJavascriptInterface(this, "_awac_");
             mWebView.getSettings().setJavaScriptEnabled(true);
 
-            System.out.println(" - load(" + mUrl + ")");
-            mWebView.loadUrl(mUrl+"?rnd="+Math.random());
+            log("- built web view [height:"+mWebView.getContentHeight()+"]");
+        }
+
+        if (!mUrlLoaded) {
+            String url = mUrl;
+            if ((url.startsWith("http://") || url.startsWith("https://")) && mReload) {
+                url += (!url.contains("?") ? "?" : "&") + "rnd=" + Math.random();
+            }
+            mWebView.loadUrl(url);
+            mUrlLoaded = true;
+
+            log("- loaded url");
         }
 
         return mRootView;
     }
 
-    public void init(Frame frame,String url) {
-        mFrame = frame;
-        mUrl = url;
-    }
 
     public boolean handleMessage(Message msg) {
         if (msg.arg1 == NEW_APP) {
+            log("handleMessage(NEW_APP)");
             String url = (String) msg.obj;
             mFrame.mAwac.startApp(url);
             return true;
         }
 
         if (msg.arg1 == START_PAGE) {
-            mFrame.mAwac.invalidateOptionsMenu();
-            //mFrame.mAwac.setNavDrawerLocked(mFrame.isNavDrawerLocked());
-            // make web view visible
-            AlphaAnimation anim = new AlphaAnimation(0.0f, 1.0f);
-            anim.setDuration(240);
-            mWebView.setVisibility(View.VISIBLE);
-            mWebView.startAnimation(anim);
+            log("handleMessage(START_PAGE)");
+            mFrame.mAwac.revealFrame(mFrame);
+            System.out.println("[measured-height:"+mWebView.getMeasuredHeight()+"]");
+            mInitTime = -1L;
             return true;
         }
 
         if (msg.arg1 == END_PAGE) {
-            String json = (String) msg.obj;
-            mFrame.mAwac.endPage(json);
+            log("handleMessage(END_PAGE)");
+            String value = (String) msg.obj;
+            mFrame.mAwac.endPage(true,value);
             return true;
         }
 
         if (msg.arg1 == OPEN_PAGE) {
+            log("handleMessage(OPEN_PAGE)");
             String[] args = (String[]) msg.obj;
-            mFrame.mAwac.openPage(args[0],args[1]);
+            mFrame.mAwac.openPage(args[0],args[1],args[2]);
+            return true;
+        }
+
+        if (msg.arg1 == NEXT_PAGE) {
+            log("handleMessage(NEXT_PAGE)");
+            String[] args = (String[]) msg.obj;
+            mFrame.mAwac.replacePage(args[0],args[1],args[2],true);
+            return true;
+        }
+
+        if (msg.arg1 == PREV_PAGE) {
+            log("handleMessage(PREV_PAGE)");
+            String[] args = (String[]) msg.obj;
+            mFrame.mAwac.replacePage(args[0],args[1],args[2],false);
             return true;
         }
 
         if (msg.arg1 == START_REFRESH) {
+
+            System.out.println("[content-width:"+mWebView.getContentHeight()+"]");
+            System.out.println("[dims:"+mWebView.getWidth()+"x"+mWebView.getHeight()+"]");
+            System.out.println("[scale:"+mWebView.getScaleX()+"x"+mWebView.getScaleY()+"]");
+            System.out.println("[measured-dims:"+mWebView.getMeasuredWidth()+"x"+mWebView.getMeasuredHeight()+"]");
+
+
+
+
             mSwipeLayout.setRefreshing(true);
             return true;
         }
@@ -130,7 +257,7 @@ public class WebViewFragment extends Fragment implements Handler.Callback, Swipe
      * Called by SwipeRefreshLayout
      */
     public void onRefresh() {
-        if (DEBUG) System.out.println("onRefresh()");
+        if (mDebug) System.out.println("onRefresh()");
         if (mGotOnRefreshCB) {
             executeJS(mVarName+".fireRefresh();");
         }
@@ -151,7 +278,7 @@ public class WebViewFragment extends Fragment implements Handler.Callback, Swipe
      * Called by AlertFragment
      */
     public void onDialogResult(boolean yes) {
-        if (DEBUG) System.out.println("onDialogResult("+yes+")");
+        if (mDebug) System.out.println("onDialogResult("+yes+")");
         executeJS(mVarName + ".fireDialogResult("+(yes?"true":"false")+");");
     }
 
@@ -159,7 +286,7 @@ public class WebViewFragment extends Fragment implements Handler.Callback, Swipe
      * Called by Awac on behalf of action bar/options menu/nav drawer
      */
     public void onAction(String action) {
-        if (DEBUG) System.out.println("onAction("+action+")");
+        if (mDebug) System.out.println("onAction("+action+")");
         if (mGotOnActionCB) {
             executeJS(mVarName + ".fireAction(\""+action+"\");");
         }
@@ -168,26 +295,33 @@ public class WebViewFragment extends Fragment implements Handler.Callback, Swipe
     /**
      * Called by Awac when child page is closed
      */
-    public void onPageClose(String childTag,boolean ok,String json) {
-        if (DEBUG) System.out.println("onPageClose("+childTag+","+ok+","+json+")");
+    public void onPageClose(String childTag,boolean ok,String value) {
+        if (mDebug) System.out.println("onPageClose("+childTag+","+ok+","+value+")");
         if (mGotOnPageCloseCB) {
-            executeJS(mVarName + ".firePageClose(\""+childTag+"\","+(ok?"true":"false")+","+json+");");
+            executeJS(mVarName + ".firePageClose(\""+childTag+"\","+(ok?"true":"false")+",\""+value+"\");");
         }
     }
 
     private void executeJS(String js) {
         if (mPageStarted) {
-            System.out.println("executeJS("+js+")");
-            mWebView.evaluateJavascript("javascript:" + js, null);
+            System.out.println("executeJS(" + js + ")");
+            if (mVarName.equals("x")) {
+                System.out.println("Awac var name not set");
+                mFrame.mAwac.showAlert("!!!! Awac var name not set !!!!");
+            }
+            else {
+                mWebView.evaluateJavascript("javascript:" + js, null);
+            }
         }
     }
 
     @JavascriptInterface
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("{WebViewFragment url:"+mUrl);
+        sb.append("{WebViewFragment url:");
+        sb.append(mUrl);
         if (mGotOnBackPressedCB) sb.append(" gotOnBackPressedCB");
-        sb.append("}");
+        sb.append('}');
         return sb.toString();
     }
 
@@ -196,33 +330,48 @@ public class WebViewFragment extends Fragment implements Handler.Callback, Swipe
      */
     @JavascriptInterface
     public void setVarName(String name) {
-        if (DEBUG) System.out.println("setVarName(" + name + ")");
+        if (mDebug) System.out.println("setVarName(" + name + ")");
         mVarName = name;
     }
 
     @JavascriptInterface
     public int getStackDepth() {
         int depth = mFrame.mAwac.getStackDepth();
-        if (DEBUG) System.out.println("getStackDepth()="+depth);
+        if (mDebug) System.out.println("getStackDepth()="+depth);
         return depth;
     }
 
     @JavascriptInterface
     public void setTitle(String title) {
-        if (DEBUG) System.out.println("WebViewFragment.setTitle(" + title + ")");
+        if (mDebug) System.out.println("WebViewFragment.setTitle(" + title + ")");
         mFrame.setTitle(title);
     }
 
     @JavascriptInterface
     public void unlockNavDrawer() {
-        if (DEBUG) System.out.println("WebViewFragment.unlockNavDrawer()");
+        if (mDebug) System.out.println("WebViewFragment.unlockNavDrawer()");
         mFrame.setNavDrawerLocked(false);
     }
 
     @JavascriptInterface
     public void showDialog(String msg,String ok,String cancel) {
-        if (DEBUG) System.out.println("showDialog("+msg+","+ok+","+cancel+")");
+        if (mDebug) System.out.println("showDialog("+msg+","+ok+","+cancel+")");
         mFrame.mAwac.showDialog(msg,ok,cancel);
+    }
+
+    @JavascriptInterface
+    public void alert(String msg) {
+        System.out.println("[measured-dims:"+mWebView.getMeasuredWidth()+"x"+mWebView.getMeasuredHeight()+"]");
+        if (mDebug) System.out.println("alert("+msg+")");
+        mFrame.mAwac.showAlert(msg);
+    }
+
+    @JavascriptInterface
+    public String getDims() {
+        int width = mWebView.getMeasuredWidth();
+        int height = mWebView.getMeasuredHeight();
+        if (mDebug) System.out.println("getDims()="+width+"x"+height);
+        return "{\"width\":"+width+",\"height\":"+height+"}";
     }
 
     /**
@@ -230,7 +379,7 @@ public class WebViewFragment extends Fragment implements Handler.Callback, Swipe
      */
     @JavascriptInterface
     public void startPage() {
-        if (DEBUG) System.out.println("startPage()");
+        log("startPage() [JS]");
         mPageStarted = true;
         Message msg = mHandler.obtainMessage();
         msg.arg1 = START_PAGE;
@@ -241,29 +390,29 @@ public class WebViewFragment extends Fragment implements Handler.Callback, Swipe
      * Indicate that we want to close this page and pop it off the stack
      */
     @JavascriptInterface
-    public void endPage(String json) {
-        if (DEBUG) System.out.println("endPage("+json+")");
+    public void endPage(String value) {
+        log("endPage("+value+") [JS]");
         Message msg = mHandler.obtainMessage();
         msg.arg1 = END_PAGE;
-        msg.obj = json;
+        msg.obj = value;
         mHandler.sendMessage(msg);
     }
 
     @JavascriptInterface
     public void addNavDrawerItem(String json) {
-        if (DEBUG) System.out.println("addNavDrawerItem("+json+")");
+        if (mDebug) System.out.println("addNavDrawerItem("+json+")");
         mFrame.mAwac.addNavDrawerItem(ActionItem.fromJson(json));
     }
 
     @JavascriptInterface
     public void addOptionsMenuItem(String json) {
-        if (DEBUG) System.out.println("addOptionsMenuItem("+json+")");
+        if (mDebug) System.out.println("addOptionsMenuItem("+json+")");
         mFrame.addOptionsMenuItem(ActionItem.fromJson(json));
     }
 
     @JavascriptInterface
     public void addActionBarItem(String json) {
-        if (DEBUG) System.out.println("addActionBarItem("+json+")");
+        if (mDebug) System.out.println("addActionBarItem("+json+")");
         mFrame.addActionBarItem(ActionItem.fromJson(json));
     }
 
@@ -271,18 +420,30 @@ public class WebViewFragment extends Fragment implements Handler.Callback, Swipe
      * Indicate that we want to open a new page and push it on the stack
      */
     @JavascriptInterface
-    public void openPage(String tag,String url) {
-        if (DEBUG) System.out.println("openPage("+tag+","+url+")");
+    public void openPage(String tag,String url,String value) {
+        log("openPage("+tag+","+url+","+value+") [JS]");
         Message msg = mHandler.obtainMessage();
         msg.arg1 = OPEN_PAGE;
-        String[] args = {tag,url};
+        String[] args = {tag,url,value};
         msg.obj = args;
+        mHandler.sendMessage(msg);
+    }
+
+    /**
+     * Indicate that we want to replace the page on the top of the stack
+     */
+    @JavascriptInterface
+    public void replacePage(String tag,String url,String value,boolean next) {
+        log("replacePage("+tag+","+url+","+value+","+next+") [JS]");
+        Message msg = mHandler.obtainMessage();
+        msg.arg1 = next ? NEXT_PAGE : PREV_PAGE;
+        msg.obj = new String[]{tag, url, value};
         mHandler.sendMessage(msg);
     }
 
     @JavascriptInterface
     public void newApp(String url) {
-        if (DEBUG) System.out.println("newApp("+url+")");
+        log("newApp("+url+") [JS]");
         Message msg = mHandler.obtainMessage();
         msg.arg1 = NEW_APP;
         msg.obj = url;
@@ -306,38 +467,52 @@ public class WebViewFragment extends Fragment implements Handler.Callback, Swipe
 
     @JavascriptInterface
     public void set(String name, String value) {
-        if (DEBUG) System.out.println("set(" + name + "," + value + ")");
+        if (mDebug) System.out.println("set(" + name + "," + value + ")");
         mFrame.mAwac.setSession(name, value);
     }
 
     @JavascriptInterface
     public String get(String name) {
         String value = mFrame.mAwac.getSession(name);
-        if (DEBUG) System.out.println("get(" + name + ")=" + value);
+        if (mDebug) System.out.println("get(" + name + ")=" + value);
+        return value;
+    }
+
+    @JavascriptInterface
+    public String getInitParam() {
+        String value = mFrame.mValue;
+        if (mDebug) System.out.println("getInitParam()=" + value);
+        return value;
+    }
+
+    @JavascriptInterface
+    public String getPageTag() {
+        String value = mFrame.mTag;
+        if (mDebug) System.out.println("getPageTag()=" + value);
         return value;
     }
 
     @JavascriptInterface
     public void gotOnBackPressedCB() {
-        if (DEBUG) System.out.println("gotOnBackPressedCB()");
+        if (mDebug) System.out.println("gotOnBackPressedCB()");
         mGotOnBackPressedCB = true;
     }
 
     @JavascriptInterface
     public void gotOnActionCB() {
-        if (DEBUG) System.out.println("gotOnActionCB()");
+        if (mDebug) System.out.println("gotOnActionCB()");
         mGotOnActionCB = true;
     }
 
     @JavascriptInterface
     public void gotOnPageCloseCB() {
-        if (DEBUG) System.out.println("gotOnPageCloseCB()");
+        if (mDebug) System.out.println("gotOnPageCloseCB()");
         mGotOnPageCloseCB = true;
     }
 
     @JavascriptInterface
     public void gotOnRefreshCB() {
-        if (DEBUG) System.out.println("gotOnRefreshCB()");
+        if (mDebug) System.out.println("gotOnRefreshCB()");
         if (!mGotOnRefreshCB) {
             mGotOnRefreshCB = true;
             Message msg = mHandler.obtainMessage();
@@ -346,16 +521,9 @@ public class WebViewFragment extends Fragment implements Handler.Callback, Swipe
         }
     }
 
-    //@JavascriptInterface
-    /*public void gotOnResultCB() {
-        if (DEBUG) System.out.println("gotOnResultCB()");
-        mGotOnResultCB = true;
-    }*/
-
-
     @JavascriptInterface
     public void startRefresh() {
-        if (DEBUG) System.out.println("startRefresh()");
+        if (mDebug) System.out.println("startRefresh()");
         Message msg = mHandler.obtainMessage();
         msg.arg1 = START_REFRESH;
         mHandler.sendMessage(msg);
@@ -363,7 +531,7 @@ public class WebViewFragment extends Fragment implements Handler.Callback, Swipe
 
     @JavascriptInterface
     public void endRefresh() {
-        if (DEBUG) System.out.println("endRefresh()");
+        if (mDebug) System.out.println("endRefresh()");
         Message msg = mHandler.obtainMessage();
         msg.arg1 = END_REFRESH;
         mHandler.sendMessage(msg);

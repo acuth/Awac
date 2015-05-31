@@ -22,10 +22,11 @@ import java.util.List;
 public class NavDrawerFragment extends Fragment {
     private Awac mAwac;
 
+    private boolean mDebug = false;
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerListView;
     private View mFragmentContainerView;
-    private List<ActionItem> mNavDrawerItems = new ArrayList<ActionItem>();
+    private List<ActionItem> mNavDrawerItems = new ArrayList<>();
     private ArrayAdapter<String> mAdapter;
 
     private void updateAdapter() {
@@ -34,7 +35,7 @@ public class NavDrawerFragment extends Fragment {
         for (ActionItem item : mNavDrawerItems) {
             sa[k++] = item.mLabel;
         }
-        mAdapter = new ArrayAdapter<String>(getActivity().getActionBar().getThemedContext(),R.layout.nav_drawer_listview_item,sa);
+        mAdapter = new ArrayAdapter<>(getActivity().getActionBar().getThemedContext(),R.layout.nav_drawer_listview_item,sa);
         mDrawerListView.setAdapter(mAdapter);
     }
 
@@ -65,16 +66,22 @@ public class NavDrawerFragment extends Fragment {
     }
 
     public void lock(boolean locked) {
-        System.out.println("NavDrawerFragment.lock("+locked+")");
+        if (mDebug) System.out.println("NavDrawerFragment.lock("+locked+")");
         mDrawerLayout.setDrawerLockMode(locked?DrawerLayout.LOCK_MODE_LOCKED_CLOSED:DrawerLayout.LOCK_MODE_UNLOCKED);
     }
 
     public void addItem(ActionItem item) {
         if (item != null && !mNavDrawerItems.contains(item)) {
-            System.out.println("NavDrawerFragment.addItem("+item+")");
+            if (mDebug) System.out.println("NavDrawerFragment.addItem("+item+")");
             mNavDrawerItems.add(item);
             updateAdapter();
         }
+    }
+
+    public void clearItems() {
+        if (mDebug) System.out.println("NavDrawerFragment.clearItems()");
+        mNavDrawerItems.clear();
+        updateAdapter();
     }
 
     public void init(int fragmentId, DrawerLayout drawerLayout) {
