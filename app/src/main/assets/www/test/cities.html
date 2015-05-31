@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+		<title>Select A City View</title>
+		<link type="text/css" rel="stylesheet" href="test.css" />
+		<script src="../js/jquery.min.js" type="text/javascript"></script>
+		<script src="../js/dateformat.js" type="text/javascript"></script>
+		<script src="../js/awac.js?v=10" type="text/javascript"></script>
+		<script src="test.js?v=10" type="text/javascript"></script>
+		<script type="text/javascript">
+		  String.prototype.capitalizeFirstLetter = function() {
+        return this.charAt(0).toUpperCase() + this.slice(1);
+      }
+      
+			var _awac = null;
+
+   	  var views = ['London\'s "Gerkin"','Paris: PROMENADE PLANTÉE','\'High Line Park\' in New York'];
+
+      function answer() { 
+			  pLog('calling answer() - on back pressed');
+			  _awac.alert('Please answer the question'); 
+			}
+   	  
+			function addOption(i) {
+			  var name = views[i];
+			  var btn = $(document.createElement('button')).appendTo($('#options'));
+        $(document.createElement('span')).html(name).appendTo(btn);
+        if (i == 0) btn.addClass('topb');
+        setButton(btn,function() {
+          pLog('endPage('+name+')');
+          _awac.endPage(name); 
+        });
+			}
+
+			$(document).ready(function() {
+			  _awac = new Awac('_awac');
+			  var initp = _awac.getInitParam();
+			  var name = initp && initp.name ? initp.name.capitalizeFirstLetter() : 'There';
+			  $('#name').html(name);
+			  for (var i=0;i<views.length;i++) addOption(i);
+			  _awac.setOnBackPressed(answer);
+			  _awac.startPage();
+			  loadFooter(initp && initp.verbose == 't');
+			});
+			</script>
+	</head>
+
+	<body>
+	  <div id="details"><div id="details-footer"></div><div id="details-blurb">
+	     <div>This example represents a page used to select an option and return a result to the page that opened it.</div>
+       <div class="code">_awac.closePage(value);</div>
+       <div>The user can still navigate away from the page is via the back button without making a selection.</div>
+    </div><!-- end of details-blurb --></div><!-- end of details -->
+
+    <div id="content">
+      <p>Hi <span id="name"></span>,<br/>Please select a favourite city view:</p>
+      <div class="holder" id="options"></div>
+    </div>
+	</body>
+</html>

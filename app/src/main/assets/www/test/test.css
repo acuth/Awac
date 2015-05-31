@@ -1,0 +1,248 @@
+body {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  background: #FCFCF1;
+  color: rgb(119, 85, 23);
+  -webkit-tap-highlight-color: rgba(0,0,0,0);
+}
+
+div#details {
+  background: #444;
+  color: #D8C5B8;
+  font-size: 80%;
+  font-family: sans-serif;
+}
+
+div#details div.code {
+  color: #51D2F9;
+  font-size: 120%;
+  font-family: monospace;
+}
+
+div#details-footer {
+  padding: 5px;
+  font-style: italic;
+}
+
+div#details-footer div.link {
+  float: left;
+}
+
+div#details-footer div.more {
+  float: right;
+}
+
+div#details-footer a {
+  text-decoration: none;
+  color: #FFF1E7;
+}
+
+div#details-blurb {
+  display: none;
+  border-top: solid 1px #D8C5B8;
+  padding: 5px;
+}
+
+div#content p {
+  padding: 10px;
+}
+
+div.txt {
+  width: 80%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+div.holder {
+  width: 80%;
+  margin-top: 20px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+div.holder input[type=text] {
+  margin: 0px;
+  padding: 0px;
+  border: solid 1px black;
+  width: 100%;
+  font-family: arial;
+	font-size: 17px;
+	line-height: 37px;
+}
+
+div.topb {
+  	border-top: solid 1px #2E5649;
+}
+
+div.btn {
+  text-align: center;
+	background2: #CFDED9;
+	border: solid 1px white;
+	border-bottom: solid 1px #2E5649;
+	cursor: pointer;
+	color: black;
+	font-family: arial;
+	font-size: 17px;
+	padding-top: 10px;
+  padding-bottom: 10px;
+	text-decoration: none;
+}
+
+div.small {
+  width: 30%;
+}
+
+div#navigation div.btn {
+  width: 20%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  background: #e2e2e2;
+  border: solid 1px #d4d4d4;
+}
+
+div.lite {
+	background: transparent;
+	border: solid 1px #2E5649;
+}
+
+div.grid {
+  float: left;
+  width: 20%;
+  margin-right: 2%;
+  margin-left: 2%;
+  margin-bottom: 4%;
+}
+
+div.left {
+  float: left;
+}
+
+div.right {
+  float: right;
+}
+
+
+div.card {
+  margin: 10px;
+  padding: 0px;
+	border: solid 1px #d5d5d5;
+	background: white;
+}
+
+div.card div.header {
+  padding: 4px;
+  border-bottom: solid 1px #d5d5d5;
+  font-size: 14px;
+  line-height: 18px;
+  color: black;
+}
+
+div.card div.cbody {
+  position: relative;
+}
+
+.circle2{
+  width:30px;
+  height:30px;
+  border-radius:15px;
+  font-size:10px;
+  color:white;
+  line-height:30px;
+  text-align:center;
+  background:transparent;
+}
+
+div.card div.cbody div.blurb {
+  padding: 4px;
+  font-size: 14px;
+  line-height: 18px;
+  float: left;
+  width: 80%;
+}
+
+div.card div.cbody div.nav {
+  padding: 4px;
+  font-size: 14px;
+  line-height: 18px;
+  float: right;
+  width: 10%;
+}
+
+
+div#log {
+  padding: 10px;
+}
+
+div.logstyle {
+  height: 200px;
+  overflow: auto;
+  margin-top: 10px;
+  background: rgba(152, 122, 68, 0.23);
+  color: rgb(17, 95, 123);
+  font-family: monospace;
+  font-weight: bold;
+  font-size: 80%;
+}
+
+
+button {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    outline: none;
+    border: solid 1px transparent;
+    border-bottom: solid 1px black;
+}
+
+button.topb {
+  border-top: solid 1px black;
+}
+
+button span {
+  	margin: 0;
+    display: block;
+    position: relative;
+    overflow: hidden;
+    padding: 10px;
+  	font-family: arial;
+	  font-size: 17px;
+	  color:  rgb(119, 85, 23);
+    cursor: pointer;
+    background: transparent;
+}
+
+button, button:hover, button:active, button:focus {
+    background: transparent;
+}
+
+button:hover span, button:active span, button:focus span, button span:focus, button span:hover, button span:active {
+    background: transparent;
+}
+
+button span.circle {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  display: block;
+  position: absolute;
+  border-radius: 50%;
+}
+
+button span.animate {
+	-webkit-animation: ripple-effect 0.3s linear;
+}
+
+@-webkit-keyframes ripple-effect {
+    from {
+    	background: rgba(128,128,128,0.3);
+    	transform: scale(0);
+    }
+    to {
+    	background: rgba(128,128,128,0);
+    	transform: scale(2.5);
+    }
+}
+
+
+

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+		<link type="text/css" rel="stylesheet" href="test.css?v=5" />
+		<script src="../js/jquery.min.js" type="text/javascript"></script>
+		<script src="../js/awac.js?v=10" type="text/javascript"></script>
+		<script src="test.js?v=12" type="text/javascript"></script>
+		<script type="text/javascript">
+			var _awac = null;
+			$(document).ready(function() {
+			  _awac = new Awac('_awac');
+			  _awac.setOnAction(showPage);
+			  _awac.unlockNavDrawer();
+			  setButton($('#samplebtn'),function() { 
+			    pLog('open sample page');
+			    _awac.openPage('sample','http://acuth.github.io/sample/highline.html');
+			  });
+			  loadFooter();
+			  _awac.startPage();
+			});
+			</script>
+	</head>
+
+	<body>
+	  <div id="details"><div id="details-footer"></div><div id="details-blurb">
+	     <div>This example represents a simple web page with the minimum of Awac specific Javascript.
+	     All that has been added is a call to start displaying the page triggered in the page's onload event:</div>
+       <div class="code">(new Awac()).startPage();</div>
+       <div>If the page has a title element, this is displayed in the action bar.</div>
+       <div>Navigation away from the page is via the back button.</div>
+    </div><!-- end of details-blurb --></div><!-- end of details -->
+
+    <div id="navigation"></div>
+  
+     <div id="content">
+       <p>Awac makes it easy to include web pages with only minor adjustments. The sample page (see below)
+       includes a Awac JS file and calls an Awac function when the page loads. 
+       Navigation out of the page is by using the back button. 
+       Links in the page open in a browser.</p>
+       
+       <div class="holder"><button class="topb" id="samplebtn"><span>Sample Page</span></button></div>
+    </div>
+	</body>
+</html>

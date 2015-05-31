@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+		<link type="text/css" rel="stylesheet" href="test.css?v=2" />
+		<script src="../js/jquery.min.js" type="text/javascript"></script>
+		<script src="../js/dateformat.js" type="text/javascript"></script>
+		<script src="../js/awac.js?v=10" type="text/javascript"></script>
+		<script src="test.js?v=10" type="text/javascript"></script>
+		<script type="text/javascript">
+var _awac = null;
+
+function testStore(x) {
+  var useJson = typeof(x) == 'object' || typeof(x) == 'array';
+  var s = x;
+  if (useJson) s = JSON.stringify(s);
+  pLog('Test session storage');
+  pLog(' - before '+s);
+  _awac.set('test_x',x);
+  x = _awac.get('test_x');
+  s = x;
+  if (useJson) s = JSON.stringify(s);
+  pLog(' - after '+s);
+}
+
+function onAction(action) {
+  if (showPage(action)) return;
+  if (action == 'store_null') testStore(null);
+  else if (action == 'store_int') testStore(123456);
+  else if (action == 'store_string') testStore("This is a string with ' and \" in it");
+  else if (action == 'store_obj') {
+    var obj = new Object();
+    obj.first = 'Jabba';
+    obj.last ='"The Hutt"';
+    testStore(obj);
+  }
+  else if (action == 'store_arr') {
+    var arr = [];
+    arr[0] = 'Red';
+    arr[1] = 'Green';
+    arr[2] = 'Blue';
+    testStore(arr);
+  }
+}
+
+$(document).ready(function() {
+  _awac = new Awac('_awac');
+  _awac.setOnAction(onAction);
+  _awac.unlockNavDrawer();
+  loadFooter(true);
+  _awac.startPage();
+});
+		</script>
+	</head>
+	<body>
+	  <div id="details"><div id="details-footer"></div><div id="details-blurb">
+	  These pages provide some examples of how to use Awac. Most pages includes a link to view the page outside of the app.
+	  </div><!-- end of details-blurb --></div><!-- end of details -->
+
+    <div id="navigation"></div>
+    
+    <div id="content">
+  	  <p>Awac provides both persistent and session name-value storage where values can be Javascript primitives, objects and arrays.</p>
+    
+      <div class="holder">
+        <div class="grid btn lite" onclick="onAction('store_null');">NULL</div>
+        <div class="grid btn lite" onclick="onAction('store_int')">INT</div>
+        <div class="grid btn lite" onclick="onAction('store_string');">STRING</div>
+        <div class="grid btn lite" onclick="onAction('store_obj')">OBJECT</div>
+        <div class="grid btn lite" onclick="onAction('store_arr');">ARRAY</div>
+        <div style="clear:both;"></div>
+      </div>
+	  </div>
+
+	</body>
+</html>

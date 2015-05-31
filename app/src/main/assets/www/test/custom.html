@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+		<link type="text/css" rel="stylesheet" href="test.css" />
+		<script src="../js/jquery.min.js" type="text/javascript"></script>
+		<script src="../js/dateformat.js" type="text/javascript"></script>
+		<script src="../js/awac.js?v=11" type="text/javascript"></script>
+		<script src="test.js?v=10" type="text/javascript"></script>
+		<script type="text/javascript">
+
+var _awac = null;
+
+function runApp(url) {
+  console.log('running '+url);
+  _awac.setTitle('Loading...');
+  _awac.newApp(url);
+}
+
+$(document).ready(function() {
+  _awac = new Awac('_awac')
+  _awac.setOnAction(showPage);
+  _awac.unlockNavDrawer();
+  setButton($('#start-app'),function() { 
+    var url = $('#url').val();
+    if (!url) 
+      _awac.alert('No web-app url supplied');
+    else {
+      _awac.store('test_custom_url',url);
+      runApp(url); 
+    }
+  });
+  setButton($('#latest-intro'),function() { runApp('http://acuth.github.io/test/index.html'); });
+  setButton($('#local-intro'),function() { runApp('file:///android_asset/www/test/index.html'); });
+  $('#url').val(_awac.load('test_custom_url'));
+  loadFooter();
+  _awac.startPage();
+  setApp(_awac.load('test_custom_url'));
+});
+		</script>
+	</head>
+	<body>
+	  <div id="details"><div id="details-footer"></div><div id="details-blurb">
+	     <div>In this example we tell Awac to load up a web-app from a specified URL.</div>
+       <div class="code"><pre>
+       _awac.newApp(url);
+       </pre></div>
+    </div><!-- end of details-blurb --></div><!-- end of details -->
+
+    <div id="navigation"></div>
+
+    <div id="content">
+      <p>This page is designed to let you supply the URL of a web-app of your own.</p>
+      <div class="holder">
+        <input id="url" type="text" placeholder="web-app url" />
+        <button id="start-app"><span>Start App</span></button>
+      </div>
+      
+      <p>Alternatively here are two versions of this introduction for you to try:</p>
+      
+      <div class="holder">
+        <button class="topb" id="latest-intro"><span>Latest (load from github)</span></button>
+        <button id="local-intro"><span>Local (bundled in app)</span></button>
+      </div>
+    </div>
+  </body>
+</html>
