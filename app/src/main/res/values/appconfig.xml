@@ -2,4 +2,5 @@
 <resources>
     <integer name="app_anim_time">240</integer>
     <string name="app_url">file:///android_asset/www/test/index.html</string>
+    <string name="console_log_file"></string>
 </resources>

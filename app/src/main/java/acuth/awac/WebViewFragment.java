@@ -2,7 +2,9 @@ package acuth.awac;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -10,8 +12,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.JavascriptInterface;
-import android.webkit.WebView;
+import android.webkit.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,6 +57,29 @@ public class WebViewFragment extends Fragment implements Handler.Callback, Swipe
         //cFragments.add(f);
     }
 
+    public class MyWebViewClient extends WebViewClient {
+        @Override
+        public boolean shouldOverrideUrlLoading(WebView view, String url) {
+            try {
+                String msg = "AWAC: opening in browser URL " + url;
+                mFrame.mAwac.mLogger.log(msg);
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                startActivity(intent);
+            } catch (Throwable th) {
+                System.out.println("Problem viewing URL " + th.getClass().getName() + ": " + th.getMessage());
+            }
+            return true;
+        }
+    }
+
+    public class MyWebChromeClient extends WebChromeClient {
+        @Override
+        public boolean onConsoleMessage(ConsoleMessage cm) {
+            String msg = cm.message() + " -- " + cm.sourceId() + " (" + cm.lineNumber() + ")";
+            mFrame.mAwac.mLogger.log(msg);
+            return true;
+        }
+    }
 
     private boolean mDebug = true;
     public int mIndex;
@@ -161,6 +185,9 @@ public class WebViewFragment extends Fragment implements Handler.Callback, Swipe
             mSwipeLayout.setOnRefreshListener(this);
             mSwipeLayout.setEnabled(false);
 
+            mWebView.setWebViewClient(new MyWebViewClient());
+            mWebView.setWebChromeClient(new MyWebChromeClient());
+
             mWebView.addJavascriptInterface(this, "_awac_");
             mWebView.getSettings().setJavaScriptEnabled(true);
 
@@ -172,6 +199,7 @@ public class WebViewFragment extends Fragment implements Handler.Callback, Swipe
             if ((url.startsWith("http://") || url.startsWith("https://")) && mReload) {
                 url += (!url.contains("?") ? "?" : "&") + "rnd=" + Math.random();
             }
+            mFrame.mAwac.mLogger.log("AWAC: loading page URL " + url);
             mWebView.loadUrl(url);
             mUrlLoaded = true;
 

@@ -7,8 +7,8 @@
 		<link type="text/css" rel="stylesheet" href="test.css" />
 		<script src="../js/jquery.min.js" type="text/javascript"></script>
 		<script src="../js/dateformat.js" type="text/javascript"></script>
-		<script src="../js/awac.js?v=10" type="text/javascript"></script>
-		<script src="test.js?v=10" type="text/javascript"></script>
+		<script src="../awac/awac.js" type="text/javascript"></script>
+		<script src="test.js" type="text/javascript"></script>
 		<script type="text/javascript">
 		  String.prototype.capitalizeFirstLetter = function() {
         return this.charAt(0).toUpperCase() + this.slice(1);
@@ -43,15 +43,24 @@
 			  _awac.setOnBackPressed(answer);
 			  _awac.startPage();
 			  loadFooter(initp && initp.verbose == 't');
+			  console.log('About to call non-existant function');
+			  gfhf()
+			  console.log('Finished calling non-existant function');
 			});
 			</script>
 	</head>
 
 	<body>
 	  <div id="details"><div id="details-footer"></div><div id="details-blurb">
-	     <div>This example represents a page used to select an option and return a result to the page that opened it.</div>
-       <div class="code">_awac.closePage(value);</div>
-       <div>The user can still navigate away from the page is via the back button without making a selection.</div>
+		  <div>This example represents a page used to select an option and return a result to the page that opened it.
+		  </div>
+		  <div class="code"><pre>
+      _awac.endPage(value);
+      </pre>
+		  </div>
+		  <div>By default the user can still navigate away from the page via the back button without making a
+			  selection.
+		  </div>
     </div><!-- end of details-blurb --></div><!-- end of details -->
 
     <div id="content">

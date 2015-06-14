@@ -1,16 +1,15 @@
 package acuth.awac;
 
 import android.app.Activity;
-
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.widget.DrawerLayout;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.support.v4.widget.DrawerLayout;
 import android.widget.Toast;
 
 import java.net.URL;
@@ -32,6 +31,7 @@ public class Awac extends Activity implements Handler.Callback {
 
     private boolean mDebug = false;
     private Stack mStack;
+    public ConsoleLogWriter mLogger;
     private Map<String,String> mSessionData;
     private boolean mReloadPages = true;
 
@@ -43,6 +43,16 @@ public class Awac extends Activity implements Handler.Callback {
             return url;
         }
         return getResources().getString(R.string.app_url);
+    }
+
+    protected String getConsoleLog() {
+        Uri uri = getIntent().getData();
+        String log = uri == null ? null : uri.getQueryParameter("log");
+        if (log != null) {
+            System.out.println("getConsoleLog() returning log from launch invocation, log=" + log);
+            return log;
+        }
+        return getResources().getString(R.string.console_log_file);
     }
 
     private void unlockNavDrawer() {
@@ -109,7 +119,7 @@ public class Awac extends Activity implements Handler.Callback {
         setContentView(R.layout.activity_awac);
 
         mHandler = new Handler(this);
-
+        mLogger = new ConsoleLogWriter(getConsoleLog());
         mStack = new Stack();
         mSessionData = new HashMap<>();
 
@@ -126,7 +136,6 @@ public class Awac extends Activity implements Handler.Callback {
     enum FrameTransition {
         OPEN,CLOSE,PREV,NEXT
     }
-
 
     private void log(String msg) {
         System.out.println("!!!! Awac"+msg);
@@ -199,7 +208,7 @@ public class Awac extends Activity implements Handler.Callback {
         if (currFrag != null && (currTrans == FrameTransition.NEXT || currTrans == FrameTransition.PREV)) trans.remove(currFrag);
 
         // the page has started so it has configured the title, nav-drawer and action bar so we can provoke a redraw
-        makeFrameCurrent(trans,frame);
+        makeFrameCurrent(trans, frame);
     }
 
     private void popFrame(boolean ok, String json) {
@@ -221,14 +230,14 @@ public class Awac extends Activity implements Handler.Callback {
         Frame oldFrame = mStack.peek();
         mStack.pop();
         mStack.push(frame);
-        displayFrame(oldFrame,frame, next ? FrameTransition.NEXT : FrameTransition.PREV);
+        displayFrame(oldFrame, frame, next ? FrameTransition.NEXT : FrameTransition.PREV);
         WebViewFragment.put(oldFrame.mWebViewFrag);
     }
 
     public void showDialog(String msg,String ok,String cancel) {
         AlertFragment dialog = new AlertFragment();
         dialog.init(msg,ok,cancel,"dialog1","true","false");
-        dialog.show(getFragmentManager(),"dialog");
+        dialog.show(getFragmentManager(), "dialog");
     }
 
     public void showAlert(String msg) {
@@ -273,10 +282,8 @@ public class Awac extends Activity implements Handler.Callback {
     }
 
     void setSession(String name,String value) {
-        mSessionData.put(name,value);
+        mSessionData.put(name, value);
     }
-
-
 
     private String resolveUrl(String url) {
         try {

@@ -4,11 +4,11 @@
 		<meta charset="utf-8" />
 		<title>Pages and more pages</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-		<link type="text/css" rel="stylesheet" href="test.css?v=4" />
+        <link type="text/css" rel="stylesheet" href="test.css"/>
 		<script src="../js/jquery.min.js" type="text/javascript"></script>
 		<script src="../js/dateformat.js" type="text/javascript"></script>
-		<script src="../js/awac.js?v=11" type="text/javascript"></script>
-		<script src="test.js?v=10" type="text/javascript"></script>
+        <script src="../awac/awac.js" type="text/javascript"></script>
+        <script src="test.js" type="text/javascript"></script>
 		<script type="text/javascript">
 var _awac = null;
 
@@ -34,14 +34,16 @@ $(document).ready(function() {
 	</head>
 	<body>
 	  <div id="details"><div id="details-footer"></div><div id="details-blurb">
-	     <div>This page demonstrates opening a page  In this example we create a global variable to represent Awac called _awac. The variable name must be supplied to the constructor to receive events.</div>
+          <div>This page demonstrates one page opening another page and receiving a result from it when it is closed.
+          </div>
        <div class="code"><pre>
        _awac = new Awac('_awac');
        _awac.setOnPageClose(function(tag,ok,value){
-         ...
+      
        });
 
-       _awac.openPage('cities','cities.html',{'name':'Jabba'});
+       _awac.openPage('cities','cities.html',
+                {'name':'Jabba'});
        </pre></div>
     </div><!-- end of details-blurb --></div><!-- end of details -->
 

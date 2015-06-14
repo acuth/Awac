@@ -3,12 +3,12 @@
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-		<link type="text/css" rel="stylesheet" href="test.css?v=1" />
+      <link type="text/css" rel="stylesheet" href="test.css"/>
 		<title>An Introduction to Awac</title>
 		<script src="../js/jquery.min.js" type="text/javascript"></script>
 		<script src="../js/dateformat.js" type="text/javascript"></script>
-		<script src="../js/awac.js?v=1" type="text/javascript"></script>
-		<script src="test.js?v=1" type="text/javascript"></script>
+      <script src="../awac/awac.js" type="text/javascript"></script>
+      <script src="test.js" type="text/javascript"></script>
 		<script type="text/javascript">
 var _awac = null;
 
@@ -26,7 +26,7 @@ function onAction(action) {
 function addPageDetails(i) {
   // add to nav drawer
   _awac.addNavDrawerItem({'label':pageTitles[i],'action':'show_'+pageNames[i]});
-  // ad button on page
+  // add button on page
   var btn = $(document.createElement('button')).appendTo($('#pages'));
   if (i == 0) btn.addClass("topb");
   $(document.createElement('span')).html(pageTitles[i]).appendTo(btn);
@@ -35,7 +35,6 @@ function addPageDetails(i) {
 
 $(document).ready(function() {
   _awac = new Awac('_awac');
-  _awac.addNavDrawerItem({'label':'Verbose Debug','action':'verbose_debug'});
   for (var i=0;i<pageNames.length;i++) addPageDetails(i);
   _awac.unlockNavDrawer();
   _awac.setOnBackPressed(exit);
