@@ -28,4 +28,12 @@
               android:name="acuth.awac.NavDrawerFragment"
               tools:layout="@layout/fragment_navigation_drawer"/>
 
+
+    <WebView
+        android:id="@+id/background_web_view"
+        android:layout_margin="0dp"
+        android:visibility="gone"
+        android:layout_width="0px"
+        android:layout_height="0px"/>
+
 </android.support.v4.widget.DrawerLayout>
