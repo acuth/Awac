@@ -3,14 +3,22 @@ package acuth.awac;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.VectorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.widget.DrawerLayout;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
+import org.json.JSONObject;
 
 import java.net.URL;
 import java.util.HashMap;
@@ -28,12 +36,16 @@ public class Awac extends Activity implements Handler.Callback {
 
     private NavDrawerFragment mNavDrawerFragment;
     private Handler mHandler;
+    private BackgroundPage mBackgroundPage;
 
     private boolean mDebug = false;
     private Stack mStack;
     public ConsoleLogWriter mLogger;
     private Map<String,String> mSessionData;
     private boolean mReloadPages = true;
+    int mPrimaryColor = -1;
+    int mPrimaryDarkColor = -1;
+    int mTextPrimaryColor = -1;
 
     protected String getAppUrl() {
         Uri uri = getIntent().getData();
@@ -55,12 +67,31 @@ public class Awac extends Activity implements Handler.Callback {
         return getResources().getString(R.string.console_log_file);
     }
 
-    private void unlockNavDrawer() {
+    private int getColor(JSONObject json, String name) {
+        int color = -1;
+        try {
+            String s = json.getString(name);
+            if (s != null) {
+                color = Color.parseColor(s);
+            }
+        } catch (Exception ex) {
+        }
+        return color;
+    }
+
+    void setColors(JSONObject json) {
+        if (mDebug) System.out.println("Awac.setColors(" + json + ")");
+        mPrimaryColor = getColor(json, "primary");
+        mTextPrimaryColor = getColor(json, "text_primary");
+        mPrimaryDarkColor = getColor(json, "primary_dark");
+    }
+
+    private void unlockNavDrawer(Frame frame) {
         if (mDebug) System.out.println("Awac.unlockNavDrawer()");
         // show menu icon
         getActionBar().setHomeButtonEnabled(true);
         getActionBar().setDisplayHomeAsUpEnabled(true);
-        getActionBar().setHomeAsUpIndicator(R.drawable.ic_menu_white);
+        getActionBar().setHomeAsUpIndicator(getIconDrawable(frame, "menu"));
         mNavDrawerFragment.lock(false);
     }
 
@@ -72,8 +103,37 @@ public class Awac extends Activity implements Handler.Callback {
         mNavDrawerFragment.lock(true);
     }
 
+    private void setActionBarColors(Frame frame) {
+        Drawable shape = getResources().getDrawable(R.drawable.action_bar_shape);
+        int color = frame.getPrimaryColor();
+        shape.setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
+        getActionBar().setBackgroundDrawable(shape);
+    }
+
+    private void setHomeIcon(Frame frame) {
+        /*if (mDebug) */
+        System.out.println("Awac.setHomeIcon()");
+        boolean showHomeIcon = !frame.isNavDrawerLocked() || frame.hasHomeItem();
+        getActionBar().setHomeButtonEnabled(showHomeIcon);
+        getActionBar().setDisplayHomeAsUpEnabled(showHomeIcon);
+        if (showHomeIcon) {
+            String iconName = !frame.isNavDrawerLocked() ? "menu" : frame.getHomeItemIcon();
+            Drawable icon = getIconDrawable(frame, iconName);
+            if (icon != null) getActionBar().setHomeAsUpIndicator(icon);
+        }
+        mNavDrawerFragment.lock(frame.isNavDrawerLocked());
+    }
+
     private void setActionBarTitle(String title) {
-        getActionBar().setTitle(title);
+        if (title == null) title = "";
+
+        Frame frame = mStack.peek();
+        getWindow().setStatusBarColor(frame.getPrimaryDarkColor());
+
+        int textColor = frame.getTextPrimaryColor();
+        Spannable text = new SpannableString(title);
+        text.setSpan(new ForegroundColorSpan(textColor), 0, text.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+        getActionBar().setTitle(text);
     }
 
     public boolean handleMessage(Message msg) {
@@ -86,7 +146,7 @@ public class Awac extends Activity implements Handler.Callback {
 
         if (msg.arg1 == UNLOCK_NAV_DRAWER) {
             if (mDebug) System.out.println("Awac.handleMessage(UNLOCK_NAV_DRAWER)");
-            unlockNavDrawer();
+            unlockNavDrawer(mStack.peek());
             return true;
         }
 
@@ -123,8 +183,11 @@ public class Awac extends Activity implements Handler.Callback {
         mStack = new Stack();
         mSessionData = new HashMap<>();
 
-        mNavDrawerFragment = (NavDrawerFragment) getFragmentManager().findFragmentById(R.id.navigation_drawer);
+        mPrimaryColor = getResources().getColor(R.color.primary);
+        mPrimaryDarkColor = getResources().getColor(R.color.primary_dark);
+        mTextPrimaryColor = getResources().getColor(R.color.text_primary);
 
+        mNavDrawerFragment = (NavDrawerFragment) getFragmentManager().findFragmentById(R.id.navigation_drawer);
         // Set up the drawer.
         mNavDrawerFragment.init(
                 R.id.navigation_drawer,
@@ -139,6 +202,27 @@ public class Awac extends Activity implements Handler.Callback {
 
     private void log(String msg) {
         System.out.println("!!!! Awac"+msg);
+    }
+
+    void startBackground(String url) {
+        System.out.println("Awac.startBackground(" + url + ")");
+        url += (!url.contains("?") ? "?" : "&") + "rnd=" + Math.random();
+        mBackgroundPage = new BackgroundPage(this, resolveUrl(url));
+    }
+
+    void stopBackground() {
+        System.out.println("Awac.stopBackground()");
+        System.out.println("!!!!!!!!!!!! NOT YET IMPLEMENTED");
+    }
+
+    void makeBackgroundRequest(int msgId, String value) {
+        System.out.println("Awac.makeBackgroundRequest(" + msgId + "," + value + ")");
+        if (mBackgroundPage != null) mBackgroundPage.sendMessage(msgId, value);
+    }
+
+    void sendBackgroundResponse(int msgId, String value) {
+        System.out.println("Awac.sendBackgroundResponse(" + msgId + "," + value + ")");
+        mStack.peek().mWebViewFrag.sendBackgroundResponse(msgId, value);
     }
 
     // the currently visible fragment
@@ -236,7 +320,8 @@ public class Awac extends Activity implements Handler.Callback {
 
     public void showDialog(String msg,String ok,String cancel) {
         AlertFragment dialog = new AlertFragment();
-        dialog.init(msg,ok,cancel,"dialog1","true","false");
+        Frame frame = mStack.peek();
+        dialog.init(frame, msg, ok, cancel, "dialog1", "true", "false");
         dialog.show(getFragmentManager(), "dialog");
     }
 
@@ -296,23 +381,49 @@ public class Awac extends Activity implements Handler.Callback {
     }
 
     private long t0 = -1L;
+    private int nMessage = 0;
+    private Map<String, Drawable> iconDrawablesCache = new HashMap<String, Drawable>();
+
+    Drawable getIconDrawable(Frame frame, String name) {
+        if (name == null) {
+            return null;
+        }
+        int color = frame.getTextPrimaryColor();
+        String key = name + "-" + color;
+        if (iconDrawablesCache.containsKey(key)) {
+            return iconDrawablesCache.get(key);
+        }
+        try {
+            String res = "ic_" + name + "_black_24dp";
+            int resId = getResources().getIdentifier(res, "drawable", getPackageName());
+            VectorDrawable vectorIcon = (VectorDrawable) getResources().getDrawable(resId).mutate();
+            vectorIcon.setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
+            iconDrawablesCache.put(key, vectorIcon);
+            return vectorIcon;
+        } catch (Exception ex) {
+            return null;
+        }
+    }
 
     void endPage(boolean ok,String value) {
         if (mStack.depth() == 0) {
             finish();
             return;
         }
+        //mBackgroundPage.sendMessage(nMessage++,BackgroundPage.stringify("end-page"));
         t0 = System.currentTimeMillis();
         popFrame(ok, value);
     }
 
     void openPage(String tag,String url,String value) {
+        //mBackgroundPage.sendMessage(nMessage++,BackgroundPage.stringify("open-page"));
         t0 = System.currentTimeMillis();
         Frame f = new Frame(this, tag, resolveUrl(url), mReloadPages, value);
         pushFrame(f);
     }
 
     void replacePage(String tag,String url,String value,boolean next) {
+        //mBackgroundPage.sendMessage(nMessage++,BackgroundPage.stringify("replace-page"));
         t0 = System.currentTimeMillis();
         Frame f = new Frame(this, tag, resolveUrl(url), mReloadPages, value);
         replaceFrame(f,next);
@@ -334,6 +445,11 @@ public class Awac extends Activity implements Handler.Callback {
     public void onBackPressed() {
         if (mDebug) System.out.println("Awac[Activity].onBackPressed()");
 
+        // if the navigation drawer is open then close it
+        if (mNavDrawerFragment.close()) {
+            return;
+        }
+
         // if this frame has a callback registered then fire it and do no more
         if (mStack.peek().mWebViewFrag.onBackPressed()) {
             return;
@@ -344,22 +460,27 @@ public class Awac extends Activity implements Handler.Callback {
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        if (mDebug) System.out.println("Awac.onPrepareOptionsMenu()");
+        /*if (mDebug)*/
+        System.out.println("Awac.onPrepareOptionsMenu()!!!!!");
         Frame frame = mStack.peek();
 
+        setActionBarColors(frame);
         setActionBarTitle(frame.getTitle());
-        if (frame.isNavDrawerLocked()) lockNavDrawer(); else unlockNavDrawer();
+        setHomeIcon(frame);
 
         if (frame.mOptionsMenuItems.size() > 0 || frame.mActionBarItems.size() > 0) {
             menu.clear();
 
             for (ActionItem item : frame.mActionBarItems) {
                 MenuItem menuItem = menu.add(item.mLabel);
+                Drawable icon = getIconDrawable(frame, item.mIcon);
+                if (icon != null) menuItem.setIcon(icon);
                 menuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
             }
 
             for (ActionItem item : frame.mOptionsMenuItems) {
-                menu.add(item.mLabel);
+                MenuItem menuItem = menu.add(item.mLabel);
+                //menuItem.setIcon(icon);
             }
         }
 
@@ -369,13 +490,17 @@ public class Awac extends Activity implements Handler.Callback {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (mDebug) System.out.println("onOptionsItemSelected("+item+")");
-
+        Frame frame = mStack.peek();
         if (item.getItemId() == android.R.id.home) {
-            mNavDrawerFragment.toggle();
+            if (frame.hasHomeItem()) {
+                onAction(frame.getHomeItemAction());
+            } else {
+                mNavDrawerFragment.toggle();
+            }
             return true;
         }
 
-        String action = mStack.peek().getActionFromLabel(item.toString());
+        String action = frame.getActionFromLabel(item.toString());
         if (action != null) {
             onAction(action);
             return true;

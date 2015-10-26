@@ -7,15 +7,17 @@ import org.json.JSONObject;
  */
 public class ActionItem {
     public final String mLabel;
+    public final String mIcon;
     public final String mAction;
 
-    ActionItem(String label,String action) {
+    private ActionItem(String label, String icon, String action) {
         mLabel = label;
+        mIcon = icon;
         mAction = action;
     }
 
     public String toString() {
-        return "{ActionItem label:"+mLabel+" action:"+mAction+"}";
+        return "{ActionItem label:" + mLabel + " icon:" + mIcon + " action:" + mAction + "}";
     }
 
     @Override
@@ -35,9 +37,11 @@ public class ActionItem {
         try {
             JSONObject jsonObj = new JSONObject(jsonStr);
             String label = jsonObj.getString("label");
+            String icon = jsonObj.has("icon") ? jsonObj.getString("icon") : null;
             String action = jsonObj.getString("action");
-            return new ActionItem(label,action);
+            return new ActionItem(label, icon, action);
         } catch (Exception ex) {
+            ex.printStackTrace();
             return null;
         }
     }

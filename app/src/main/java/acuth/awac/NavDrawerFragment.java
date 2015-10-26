@@ -3,9 +3,9 @@ package acuth.awac;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.os.Bundle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -67,7 +67,7 @@ public class NavDrawerFragment extends Fragment {
 
     public void lock(boolean locked) {
         if (mDebug) System.out.println("NavDrawerFragment.lock("+locked+")");
-        mDrawerLayout.setDrawerLockMode(locked?DrawerLayout.LOCK_MODE_LOCKED_CLOSED:DrawerLayout.LOCK_MODE_UNLOCKED);
+        mDrawerLayout.setDrawerLockMode(locked ? DrawerLayout.LOCK_MODE_LOCKED_CLOSED : DrawerLayout.LOCK_MODE_UNLOCKED);
     }
 
     public void addItem(ActionItem item) {
@@ -109,6 +109,14 @@ public class NavDrawerFragment extends Fragment {
         else {
             mDrawerLayout.openDrawer(mFragmentContainerView);
         }
+    }
+
+    boolean close() {
+        if (mDrawerLayout.isDrawerOpen(mFragmentContainerView)) {
+            mDrawerLayout.closeDrawer(mFragmentContainerView);
+            return true;
+        }
+        return false;
     }
 
     @Override

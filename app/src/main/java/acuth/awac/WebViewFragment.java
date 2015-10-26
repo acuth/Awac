@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.*;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +33,10 @@ public class WebViewFragment extends Fragment implements Handler.Callback, Swipe
     private static final int NEW_APP = 8;
     private static final int NEXT_PAGE = 9;
     private static final int PREV_PAGE = 10;
+    private static final int START_BACKGROUND = 11;
+    private static final int STOP_BACKGROUND = 12;
+    private static final int MAKE_BACKGROUND_REQUEST = 13;
+    private static final int SEND_BACKGROUND_RESPONSE = 14;
 
     private static int cIndex = 0;
     private static List<WebViewFragment> cFragments = new ArrayList<>();
@@ -97,6 +102,7 @@ public class WebViewFragment extends Fragment implements Handler.Callback, Swipe
     private boolean mGotOnRefreshCB = false;
     private boolean mGotOnActionCB = false;
     private boolean mGotOnPageCloseCB = false;
+    private boolean mGotOnMessageCB = false;
     private long mInitTime = -1L;
 
     public WebViewFragment() {
@@ -120,6 +126,7 @@ public class WebViewFragment extends Fragment implements Handler.Callback, Swipe
         mGotOnRefreshCB = false;
         mGotOnActionCB = false;
         mGotOnPageCloseCB = false;
+        mGotOnMessageCB = false;
 
         mInitTime = System.currentTimeMillis();
     }
@@ -182,6 +189,9 @@ public class WebViewFragment extends Fragment implements Handler.Callback, Swipe
 
             mHandler = new Handler(this);
             mSwipeLayout = (SwipeRefreshLayout) mRootView.findViewById(R.id.swipe_layout);
+
+            mSwipeLayout.setColorSchemeColors(mFrame.getPrimaryDarkColor());
+
             mSwipeLayout.setOnRefreshListener(this);
             mSwipeLayout.setEnabled(false);
 
@@ -215,6 +225,32 @@ public class WebViewFragment extends Fragment implements Handler.Callback, Swipe
             log("handleMessage(NEW_APP)");
             String url = (String) msg.obj;
             mFrame.mAwac.startApp(url);
+            return true;
+        }
+
+        if (msg.arg1 == START_BACKGROUND) {
+            log("handleMessage(START_BACKGROUND)");
+            mFrame.mAwac.startBackground((String) msg.obj);
+            return true;
+        }
+
+        if (msg.arg1 == STOP_BACKGROUND) {
+            log("handleMessage(STOP_BACKGROUND)");
+            mFrame.mAwac.stopBackground();
+            return true;
+        }
+
+        if (msg.arg1 == MAKE_BACKGROUND_REQUEST) {
+            log("handleMessage(MAKE_BACKGROUND_REQUEST)");
+            String[] args = (String[]) msg.obj;
+            mFrame.mAwac.makeBackgroundRequest(Integer.parseInt(args[0]), args[1]);
+            return true;
+        }
+
+        if (msg.arg1 == SEND_BACKGROUND_RESPONSE) {
+            log("handleMessage(SEND_BACKGROUND_RESPONSE)");
+            String[] args = (String[]) msg.obj;
+            onBackgroundResponse(Integer.parseInt(args[0]), args[1]);
             return true;
         }
 
@@ -261,9 +297,6 @@ public class WebViewFragment extends Fragment implements Handler.Callback, Swipe
             System.out.println("[scale:"+mWebView.getScaleX()+"x"+mWebView.getScaleY()+"]");
             System.out.println("[measured-dims:"+mWebView.getMeasuredWidth()+"x"+mWebView.getMeasuredHeight()+"]");
 
-
-
-
             mSwipeLayout.setRefreshing(true);
             return true;
         }
@@ -287,7 +320,7 @@ public class WebViewFragment extends Fragment implements Handler.Callback, Swipe
     public void onRefresh() {
         if (mDebug) System.out.println("onRefresh()");
         if (mGotOnRefreshCB) {
-            executeJS(mVarName+".fireRefresh();");
+            executeJS(mVarName + ".fireRefresh();");
         }
     }
 
@@ -326,8 +359,13 @@ public class WebViewFragment extends Fragment implements Handler.Callback, Swipe
     public void onPageClose(String childTag,boolean ok,String value) {
         if (mDebug) System.out.println("onPageClose("+childTag+","+ok+","+value+")");
         if (mGotOnPageCloseCB) {
-            executeJS(mVarName + ".firePageClose(\""+childTag+"\","+(ok?"true":"false")+",\""+value+"\");");
+            executeJS(mVarName + ".firePageClose(\"" + childTag + "\"," + (ok ? "true" : "false") + ",\"" + value + "\");");
         }
+    }
+
+    public void onBackgroundResponse(int msgId, String value) {
+        if (mDebug) System.out.println("onBackgroundResponse(" + msgId + "," + value + ")");
+        executeJS(mVarName + ".fireBackgroundResponse(" + msgId + ",\"" + value + "\");");
     }
 
     private void executeJS(String js) {
@@ -383,8 +421,8 @@ public class WebViewFragment extends Fragment implements Handler.Callback, Swipe
 
     @JavascriptInterface
     public void showDialog(String msg,String ok,String cancel) {
-        if (mDebug) System.out.println("showDialog("+msg+","+ok+","+cancel+")");
-        mFrame.mAwac.showDialog(msg,ok,cancel);
+        if (mDebug) System.out.println("showDialog(" + msg + "," + ok + "," + cancel + ")");
+        mFrame.mAwac.showDialog(msg, ok, cancel);
     }
 
     @JavascriptInterface
@@ -427,6 +465,41 @@ public class WebViewFragment extends Fragment implements Handler.Callback, Swipe
     }
 
     @JavascriptInterface
+    public void startBackground(String url) {
+        log("startBackground(" + url + ") [JS]");
+        Message msg = mHandler.obtainMessage();
+        msg.arg1 = START_BACKGROUND;
+        msg.obj = url;
+        mHandler.sendMessage(msg);
+    }
+
+    @JavascriptInterface
+    public void stopBackground() {
+        log("stopBackground() [JS]");
+        Message msg = mHandler.obtainMessage();
+        msg.arg1 = STOP_BACKGROUND;
+        mHandler.sendMessage(msg);
+    }
+
+    @JavascriptInterface
+    public void makeBackgroundRequest(String msgId, String value) {
+        log("makeBackgroundRequest(" + msgId + "," + value + ") [JS]");
+        Message msg = mHandler.obtainMessage();
+        msg.arg1 = MAKE_BACKGROUND_REQUEST;
+        String[] args = {msgId, value};
+        msg.obj = args;
+        mHandler.sendMessage(msg);
+    }
+
+    public void sendBackgroundResponse(int msgId, String value) {
+        Message msg = mHandler.obtainMessage();
+        msg.arg1 = SEND_BACKGROUND_RESPONSE;
+        String[] args = {Integer.toString(msgId), value};
+        msg.obj = args;
+        mHandler.sendMessage(msg);
+    }
+
+    @JavascriptInterface
     public void addNavDrawerItem(String json) {
         if (mDebug) System.out.println("addNavDrawerItem("+json+")");
         mFrame.mAwac.addNavDrawerItem(ActionItem.fromJson(json));
@@ -442,6 +515,32 @@ public class WebViewFragment extends Fragment implements Handler.Callback, Swipe
     public void addActionBarItem(String json) {
         if (mDebug) System.out.println("addActionBarItem("+json+")");
         mFrame.addActionBarItem(ActionItem.fromJson(json));
+    }
+
+    @JavascriptInterface
+    public void setHomeItem(String json) {
+        if (mDebug) System.out.println("setHomeItem(" + json + ")");
+        mFrame.setHomeItem(ActionItem.fromJson(json));
+    }
+
+    @JavascriptInterface
+    public void setPageColors(String jsonStr) {
+        if (mDebug) System.out.println("setPageColors(" + jsonStr + ")");
+        try {
+            JSONObject jsonObj = new JSONObject(jsonStr);
+            mFrame.setColors(jsonObj);
+        } catch (Exception ex) {
+        }
+    }
+
+    @JavascriptInterface
+    public void setAppColors(String jsonStr) {
+        if (mDebug) System.out.println("setAppColors(" + jsonStr + ")");
+        try {
+            JSONObject jsonObj = new JSONObject(jsonStr);
+            mFrame.mAwac.setColors(jsonObj);
+        } catch (Exception ex) {
+        }
     }
 
     /**
@@ -478,6 +577,15 @@ public class WebViewFragment extends Fragment implements Handler.Callback, Swipe
         mHandler.sendMessage(msg);
     }
 
+    @JavascriptInterface
+    public void sendMessage(String tag, String url, String value) {
+        log("openPage(" + tag + "," + url + "," + value + ") [JS]");
+        Message msg = mHandler.obtainMessage();
+        msg.arg1 = OPEN_PAGE;
+        String[] args = {tag, url, value};
+        msg.obj = args;
+        mHandler.sendMessage(msg);
+    }
 
     @JavascriptInterface
     public void store(String name, String value) {
@@ -504,6 +612,12 @@ public class WebViewFragment extends Fragment implements Handler.Callback, Swipe
         String value = mFrame.mAwac.getSession(name);
         if (mDebug) System.out.println("get(" + name + ")=" + value);
         return value;
+    }
+
+    @JavascriptInterface
+    public String getImplementation() {
+        if (mDebug) System.out.println("getImplementation()=android");
+        return "android";
     }
 
     @JavascriptInterface
@@ -536,6 +650,12 @@ public class WebViewFragment extends Fragment implements Handler.Callback, Swipe
     public void gotOnPageCloseCB() {
         if (mDebug) System.out.println("gotOnPageCloseCB()");
         mGotOnPageCloseCB = true;
+    }
+
+    @JavascriptInterface
+    public void gotOnMessageCB() {
+        if (mDebug) System.out.println("gotOnMessageCB()");
+        mGotOnMessageCB = true;
     }
 
     @JavascriptInterface

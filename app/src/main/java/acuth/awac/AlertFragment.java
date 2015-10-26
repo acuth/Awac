@@ -5,7 +5,9 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.widget.TextView;
 
 /**
  * Created by adrian on 02/03/15.
@@ -19,14 +21,16 @@ public class AlertFragment extends DialogFragment {
     private String mCancelLabel;
     private String mOKAction;
     private String mCancelAction;
+    private int mPrimaryDarkColor;
 
-    public void init(String msg,String okLabel,String cancelLabel,String action,String okAction,String cancelAction) {
+    public void init(Frame frame, String msg, String okLabel, String cancelLabel, String action, String okAction, String cancelAction) {
         mMsg = msg;
         mOKLabel = okLabel;
         mCancelLabel = cancelLabel;
         mAction = action;
         mOKAction = okAction;
         mCancelAction = cancelAction;
+        mPrimaryDarkColor = frame.getPrimaryDarkColor();
     }
 
     @Override
@@ -69,5 +73,14 @@ public class AlertFragment extends DialogFragment {
     public void onCancel(DialogInterface dialog) {
         mAwac.onDialogResult(false);
         super.onCancel(dialog);
+    }
+
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        ((TextView) getDialog().findViewById(android.R.id.message)).setTextColor(Color.BLACK);
+        ((AlertDialog) getDialog()).getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(mPrimaryDarkColor);
+        ((AlertDialog) getDialog()).getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(mPrimaryDarkColor);
     }
 }

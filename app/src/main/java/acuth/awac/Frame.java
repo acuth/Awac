@@ -1,5 +1,8 @@
 package acuth.awac;
 
+import android.graphics.Color;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,6 +20,10 @@ public class Frame {
     final List<ActionItem> mOptionsMenuItems = new ArrayList<>();
     final List<ActionItem> mActionBarItems = new ArrayList<>();
 
+    private ActionItem mHomeItem = null;
+    private int mPrimaryColor = -1;
+    private int mTextPrimaryColor = -1;
+    private int mPrimaryDarkColor = -1;
     private boolean mNavDrawerLocked = true;
     private String mTitle = null;
 
@@ -49,8 +56,58 @@ public class Frame {
         return mTitle;
     }
 
+    private int getColor(JSONObject json, String name) {
+        int color = -1;
+        try {
+            String s = json.getString(name);
+            if (s != null) {
+                color = Color.parseColor(s);
+            }
+        } catch (Exception ex) {
+        }
+        return color;
+    }
+
+    void setColors(JSONObject json) {
+        if (mDebug) System.out.println("Frame.setColors(" + json + ")");
+        mPrimaryColor = getColor(json, "primary");
+        mTextPrimaryColor = getColor(json, "text_primary");
+        mPrimaryDarkColor = getColor(json, "primary_dark");
+    }
+
+    int getPrimaryColor() {
+        return mPrimaryColor == -1 ? mAwac.mPrimaryColor : mPrimaryColor;
+    }
+
+    int getTextPrimaryColor() {
+        return mTextPrimaryColor == -1 ? mAwac.mTextPrimaryColor : mTextPrimaryColor;
+    }
+
+    int getPrimaryDarkColor() {
+        return mPrimaryDarkColor == -1 ? mAwac.mPrimaryDarkColor : mPrimaryDarkColor;
+    }
+
+
     boolean isNavDrawerLocked() {
         return mNavDrawerLocked;
+    }
+
+    boolean hasHomeItem() {
+        System.out.println("Frame.hasHomeItem() mHomeItem=" + mHomeItem);
+        return mHomeItem != null;
+    }
+
+    String getHomeItemIcon() {
+        return mHomeItem.mIcon;
+    }
+
+    String getHomeItemAction() {
+        return mHomeItem.mAction;
+    }
+
+    void setHomeItem(ActionItem item) {
+        System.out.println("Frame.setHomeItem(" + item + ")");
+        mHomeItem = item;
     }
 
     void addActionBarItem(ActionItem item) {
