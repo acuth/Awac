@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <script src="../awac/awac.js" type="text/javascript"></script>
+    <script type="text/javascript">
+ var _awac = null;
+ var _startDate = null;
+ var _nPage = 0;
+ 
+ function doOnLoad() {
+    _startDate = new Date();
+    _awac = new Awac('_awac');
+    _awac.setOnMessage(onMessage);
+    _awac.startPage();
+    console.log('------ background page loaded');
+ }
+
+ function onMessage(msgId,val) {
+    console.log('------ background got msg-id='+msgId+' value='+val);
+    if (val == 'status') {
+      var r = '<div style="padding:4px;border: solid 1px gray;">BACKGROUND STATUS<hr/>';
+      r += 'n-page:'+_nPage+'<br/>';
+      r += 'started:'+_startDate;
+      r += '</div>';
+      _awac.replyMessage(msgId,r);
+    }
+    else if (val == 'new-page') {
+      _nPage++;
+    }
+    else {
+      setTimeout(function() {
+        console.log('------ background sending response msg-id='+msgId);
+        var reply = {};
+        reply.msg = val;
+        reply.ok = true;
+        _awac.replyMessage(msgId,reply);
+      },5000);
+    }
+ }
+
+    </script>
+</head>
+<body onload="doOnLoad();">
+</body>
+</html>

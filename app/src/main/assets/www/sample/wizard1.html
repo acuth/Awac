@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+    <style type="text/css">
+        body {
+        background: #876;
+        margin: 0;
+        padding: 0;
+        }
+
+        #content {
+        margin-top:120px;
+        margin-left:auto;
+        margin-right:auto;
+        width:50%;
+        text-align: center;
+        color: white;
+        font-size: 200%;
+        }
+
+        #calltoaction {
+        position: absolute;
+        width: 100%;
+        }
+
+        #calltoaction div {
+        -webkit-border-radius: 4px;
+        margin: 60px;
+        padding: 10px;
+        background: white;
+        color: #403830;
+        text-align: center;
+        }
+
+    </style>
+    <script src="../js/jquery.min.js" type="text/javascript"></script>
+    <script src="../awac/awac.js" type="text/javascript"></script>
+    <script type="text/javascript">
+			var _awac = null;
+			var _backPressedOnce = false;
+			
+			function onAction(action) {
+			  if ('back' == action) {
+			    onBackPressed();
+			  }
+			  else if ('skip' == action) {
+			    console.log('skipping to next page');
+			    _awac.replacePage('wizard','wizard2.html',null,true);
+			  }
+			}
+			
+			function onBackPressed() {
+			  if (_backPressedOnce) {
+			    console.log('back pressed once already - ending page');
+			    _awac.endPage();
+			  }
+			  else {
+			    console.log('back pressed - put up alert');
+			    _awac.alert('Press back again to exit');
+			    _backPressedOnce = true;
+			  }
+			}
+			
+			function revealCallToAction() {
+			  var cta = $('#calltoaction');
+			  cta.show().css('top',(_awac.getDims().height-cta.height())+'px');
+			}
+			
+			$(document).ready(function() {
+			  _awac = new Awac('_awac');
+			  _awac.setOnAction(onAction);
+			  _awac.setOnBackPressed(onBackPressed);
+			  _awac.setHomeItem({'label':'Back','icon':'arrow_back','action':'back'});
+			  _awac.addActionBarItem({'label':'SKIP','action':'skip'});
+			  $('#calltoaction').on('click',function(){_awac.alert('Sorry, but this call to action has not yet been implemented');});
+			  _awac.startPage();
+			  setTimeout(revealCallToAction,60);
+			});
+
+    </script>
+</head>
+<body>
+<div id="content">Awac can be used to build all sorts of things</div>
+<div id="calltoaction">
+    <div>BUILD SOMETHING CRAZY</div>
+</div>
+</body>
+</html>

@@ -38,7 +38,7 @@ $(document).ready(function() {
   setButton($('#start-refresh'),startRefresh );
   setButton($('#end-refresh'),endRefresh );
   
-  
+  _awac.makeBackgroundRequest('new-page');
   loadFooter(true);
   _awac.startPage();
 });

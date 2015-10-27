@@ -1,6 +1,7 @@
 
-var pageNames = ['simple','refresh','dialogs','storage','actions','pages','sideways','custom'];
-var pageTitles = ['Adding Web Pages','Supporting Refresh','Dialogs and Alerts','App Storage','Adding Actions','Opening Pages','Replacing Pages','Do It Yourself'];
+var pageNames = ['simple','refresh','dialogs','storage','actions','pages','sideways','colors','backtask','custom'];
+var pageTitles = ['Adding Web Pages','Supporting Refresh','Dialogs and Alerts','App Storage','Adding Actions','Opening Pages',
+'Replacing Pages','Setting Colors','Background Page','Do It Yourself'];
 
 function openFooterBlurb() {
   $('#details-blurb').show(400);

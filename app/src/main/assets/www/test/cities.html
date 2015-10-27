@@ -17,11 +17,6 @@
 			var _awac = null;
 
    	  var views = ['London\'s "Gerkin"','Paris: PROMENADE PLANTÉE','\'High Line Park\' in New York'];
-
-      function answer() { 
-			  pLog('calling answer() - on back pressed');
-			  _awac.alert('Please answer the question'); 
-			}
    	  
 			function addOption(i) {
 			  var name = views[i];
@@ -40,26 +35,25 @@
 			  var name = initp && initp.name ? initp.name.capitalizeFirstLetter() : 'There';
 			  $('#name').html(name);
 			  for (var i=0;i<views.length;i++) addOption(i);
-			  _awac.setOnBackPressed(answer);
 			  _awac.startPage();
 			  loadFooter(initp && initp.verbose == 't');
-			  console.log('About to call non-existant function');
-			  gfhf()
-			  console.log('Finished calling non-existant function');
 			});
 			</script>
 	</head>
 
 	<body>
 	  <div id="details"><div id="details-footer"></div><div id="details-blurb">
-		  <div>This example represents a page used to select an option and return a result to the page that opened it.
+		  <div>This example represents a page used to display a welcome message based on the init parameter
+			  and a set of options which allows the user to select a result to return to the page that opened it.
 		  </div>
 		  <div class="code"><pre>
-      _awac.endPage(value);
+      var name = _awac.getInitParam().name;
+      ...
+      _awac.startPage();
+      ...
+      var result = 'London\'s "Gerkin"';
+      _awac.endPage(result);
       </pre>
-		  </div>
-		  <div>By default the user can still navigate away from the page via the back button without making a
-			  selection.
 		  </div>
     </div><!-- end of details-blurb --></div><!-- end of details -->
 

@@ -8,6 +8,7 @@ function MockContainer(awac) {
 }
 
 MockContainer.prototype.setVarName = function(varName) {
+  if (this.debug) console.log('var '+varName+' = new Awac()');
   this.varName = varName;
 };
 
@@ -17,7 +18,7 @@ MockContainer.prototype.toString = function() {
 
 MockContainer.prototype.setTitle = function(title) {
   if (this.debug) console.log(this.varName+'.setTitle('+title+')');
-  if (!document.title) document.title = title;
+  if (title) document.title = title;
 };
 
 MockContainer.prototype.addNavDrawerItem = function(json) {
@@ -30,6 +31,18 @@ MockContainer.prototype.addOptionsMenuItem = function(json) {
 
 MockContainer.prototype.addActionBarItem = function(json) {
   if (this.debug) console.log(this.varName+'.addActionBarItem('+json+')');
+};
+
+MockContainer.prototype.setPageColors = function(json) {
+  if (this.debug) console.log(this.varName+'.setPageColors('+json+')');
+};
+
+MockContainer.prototype.setAppColors = function(json) {
+  if (this.debug) console.log(this.varName+'.setAppColors('+json+')');
+};
+
+MockContainer.prototype.setHomeItem = function(json) {
+  if (this.debug) console.log(this.varName+'.setHomeItem('+json+')');
 };
 
 MockContainer.prototype.startPage = function() {
@@ -56,6 +69,11 @@ MockContainer.prototype.get = function(name) {
   return value;
 };
 
+MockContainer.prototype.getImplementation = function() {
+  if (this.debug) console.log(this.varName+'.getImplementation()=mock');
+  return 'mock';
+};
+
 MockContainer.prototype.store = function(name,value) {
   if (this.debug) console.log(this.varName+'.store('+name+','+value+')');
   localStorage.setItem(name,value);
@@ -65,6 +83,10 @@ MockContainer.prototype.load = function(name) {
   var value = localStorage.getItem(name);
   if (this.debug) console.log(this.varName+'.load('+name+')='+value);
   return value;
+};
+
+MockContainer.prototype.sendMessage = function(msgId,value) {
+  if (this.debug) console.log(this.varName+'.sendMessage('+msgId+','+value+')');
 };
 
 MockContainer.prototype.openPage = function(tag,url,value) {
@@ -114,6 +136,10 @@ MockContainer.prototype.gotOnActionCB = function() {
   if (this.debug) console.log(this.varName+'.gotOnActionCB()');
 };
 
+MockContainer.prototype.gotOnMessageCB = function() {
+  if (this.debug) console.log(this.varName+'.gotOnMessageCB()');
+};
+
 MockContainer.prototype.gotOnPageCloseCB = function() {
   if (this.debug) console.log(this.varName+'.gotOnPageCloseCB()');
 };
@@ -124,6 +150,22 @@ MockContainer.prototype.startRefresh = function() {
 
 MockContainer.prototype.endRefresh = function() {
   if (this.debug) console.log(this.varName+'.endRefresh()');
+};
+
+MockContainer.prototype.startBackground = function(url) {
+  if (this.debug) console.log(this.varName+'.startBackground('+url+')');
+};
+
+MockContainer.prototype.stopBackground = function() {
+  if (this.debug) console.log(this.varName+'.stopBackground()');
+};
+
+MockContainer.prototype.makeBackgroundRequest = function(msgId,value) {
+  if (this.debug) console.log(this.varName+'.makeBackgroundRequest('+msgId+','+value+')');
+};
+
+MockContainer.prototype.callBackground = function() {
+  if (this.debug) console.log(this.varName+'.callBackground()');
 };
 
 MockContainer.prototype.getStackDepth = function() {
@@ -170,11 +212,14 @@ function Awac(varName) {
   this.ondialog = null;
   this.onrefresh = null;
   this.onresult = null;
+  this.onmessage = null;
   this.onaction = null;
   this.onpageclose = null;
   this.started = false;
   this.gottitle = false;
   this.debug = true;
+  this.nBackgroundRequest = 0;
+  this.onbackgroundresp = [];
 }
 
 Awac.prototype.toString = function() {
@@ -221,6 +266,18 @@ Awac.prototype.addActionBarItem = function(obj) {
   this.container.addActionBarItem(JSON.stringify(obj));
 };
 
+Awac.prototype.setAppColors = function(obj) {
+  this.container.setAppColors(JSON.stringify(obj));
+};
+
+Awac.prototype.setPageColors = function(obj) {
+  this.container.setPageColors(JSON.stringify(obj));
+};
+
+Awac.prototype.setHomeItem = function(obj) {
+  this.container.setHomeItem(JSON.stringify(obj));
+};
+
 Awac.prototype.getStackDepth = function() {
   return this.container.getStackDepth();
 };
@@ -247,6 +304,10 @@ Awac.prototype.get = function(name) {
   return this.parse(s);
 };
 
+Awac.prototype.getImplementation = function() {
+  return this.container.getImplementation();
+};
+
 Awac.prototype.store = function(name,value) {
   var v = this.stringify(value);
   this.container.store(name,v);
@@ -255,6 +316,13 @@ Awac.prototype.store = function(name,value) {
 Awac.prototype.load = function(name) {
   var s = this.container.load(name);
   return this.parse(s);
+};
+
+Awac.prototype.replyMessage = function(msgId,value) {
+  if (msgId != -1) {
+    var v = this.stringify(value);
+    this.container.replyMessage(msgId,v);
+  }
 };
 
 Awac.prototype.getInitParam = function() {
@@ -278,6 +346,40 @@ Awac.prototype.startPage = function() {
   }
 };
 
+Awac.prototype.setMdlCss = function(containerId,mdlCssUrl) {
+  console.log('Awac.setMdlCss()');
+  var dims = this.getDims();
+  console.log(' - dims='+dims.width+'x'+dims.height);
+  if (dims.width === 0 || dims.height === 0) {
+    console.log(' - dims not set - retry in 50ms');
+    var awac = this;
+    setTimeout(function() { awac.setMdlCss(containerId,mdlCssUrl); },50);
+    return;
+  }
+  
+  var e = document.getElementById(containerId);
+  e.style.width = dims.width+'px';
+  e.style.height = dims.height+'px';
+ 
+  var urls = mdlCssUrl.split(',');
+  for (var i=0;i<urls.length;i++) {
+  var link = document.createElement( 'link' );
+    link.href = urls[i];
+    link.type = 'text/css';
+    link.rel = 'stylesheet';
+    document.getElementsByTagName( 'head' )[0].appendChild( link );
+  }
+  // tell MDL component handler to upgrade the page 
+  componentHandler.upgradeDom();
+};
+    
+/* Call this to make the web page visible which uses Material Design Lite */
+Awac.prototype.startMdlPage = function(containerId,mdlCssUrl) {
+  this.startPage();
+  var awac = this;
+  setTimeout(function() { awac.setMdlCss(containerId,mdlCssUrl); },50);
+};      
+
 /* End displaying the page and pop it off the stack */
 Awac.prototype.endPage = function(value) {
   var v = this.stringify(value);
@@ -292,7 +394,7 @@ Awac.prototype.openPage = function(tag,url,value) {
 
 /* Replace page on top of the stack */
 Awac.prototype.replacePage = function(tag,url,value,next) {
-   var v = this.stringify(value);
+  var v = this.stringify(value);
   this.container.replacePage(tag,url,v,next);
 };
 
@@ -331,6 +433,11 @@ Awac.prototype.setOnAction = function(cb) {
   this.onaction = cb;
 };
 
+Awac.prototype.setOnMessage = function(cb) {
+  this.container.gotOnMessageCB();
+  this.onmessage = cb;
+};
+
 Awac.prototype.setOnPageClose = function(cb) {
   this.container.gotOnPageCloseCB();
   this.onpageclose = cb;
@@ -359,9 +466,21 @@ Awac.prototype.fireAction = function(action) {
   if (this.onaction) this.onaction(action);
 };
 
+Awac.prototype.fireMessage = function(msgId,value) {
+  if (this.debug) console.log('Awac.fireMessage('+msgId+','+value+')');
+  if (this.onmessage) this.onmessage(msgId,this.parse(value));
+};
+
 Awac.prototype.firePageClose = function(tag,ok,value) {
   if (this.debug) console.log('Awac.firePageClose('+tag+','+ok+','+value+')');
   if (this.onpageclose) this.onpageclose(tag,ok,this.parse(value));
+};
+
+Awac.prototype.fireBackgroundResponse = function(msgId,value) {
+  if (this.debug) console.log('Awac.fireBackgroundResponse('+msgId+','+value+')');
+  var cb = this.onbackgroundresp[msgId];
+  this.onbackgroundresp[msgId] = null;
+  cb(this.parse(value));
 };
 
 //
@@ -372,5 +491,29 @@ Awac.prototype.startRefresh = function() {
 
 Awac.prototype.endRefresh = function() {
   this.container.endRefresh();
+};
+
+Awac.prototype.startBackground = function(url) {
+  this.container.startBackground(url);
+};
+
+Awac.prototype.stopBackground = function() {
+  this.container.stopBackground();
+};
+
+Awac.prototype.getBackgroundResponse = function(value,cb) {
+  var v = this.stringify(value);
+  var msgId = this.nBackgroundRequest++;
+  this.onbackgroundresp[msgId] = cb;
+  this.container.makeBackgroundRequest(msgId,v);
+};
+
+Awac.prototype.makeBackgroundRequest = function(value) {
+  var v = this.stringify(value);
+  this.container.makeBackgroundRequest(-1,v);
+};
+
+Awac.prototype.callBackground = function() {
+  this.container.callBackground();
 };
 

@@ -27,6 +27,7 @@ $(document).ready(function() {
       _awac.openPage('cities','cities.html',p); 
     }
   });
+  _awac.makeBackgroundRequest('new-page');
   loadFooter(true);
   _awac.startPage();
 });
@@ -34,24 +35,27 @@ $(document).ready(function() {
 	</head>
 	<body>
 	  <div id="details"><div id="details-footer"></div><div id="details-blurb">
-          <div>This page demonstrates one page opening another page and receiving a result from it when it is closed.
+          <div>This page demonstrates one page opening another page and passing it a parameter and then receiving a
+              result from it when it is closed.
           </div>
        <div class="code"><pre>
-       _awac = new Awac('_awac');
-       _awac.setOnPageClose(function(tag,ok,value){
-      
+       _awac.setOnPageClose(function(tag,ok,result){
+          // ok == false indicates 
+          // that the page was 'backed' out of
        });
 
-       _awac.openPage('cities','cities.html',
-                {'name':'Jabba'});
+       var tag = 'cities';
+       var param = {'name':'Jabba'};
+       _awac.openPage(tag,'cities.html',param);
        </pre></div>
     </div><!-- end of details-blurb --></div><!-- end of details -->
 
     <div id="navigation"></div>
     
      <div id="content">
-        <p>Awac maintains a stack of open pages. When one page opens another, it is pushed onto the stack. When a page ends it is popped off the stack. 
-        In addition, Awac allows parameters to be sent to newly opened pages and returned from pages that have ended.</p>
+        <p>Awac maintains a stack of open pages. When one page opens another, it is pushed onto the stack. When a page ends it is popped off the stack.
+            In addition, Awac allows an init parameter to be sent to newly opened pages and a result to be retrieved
+            from pages when they are closed.</p>
 
         <div class="holder">
           <input id="name-input" type="text" placeholder="Your name" />

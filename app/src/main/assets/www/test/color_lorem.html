@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+    <link type="text/css" rel="stylesheet" href="test.css"/>
+    <style type="text/css">
+        body {
+        background: white;
+        color: #444;
+        }
+
+        button span {
+        color: #444;
+        }
+    </style>
+    <title>Lorem Ipsum</title>
+    <script src="../js/jquery.min.js" type="text/javascript"></script>
+    <script src="../awac/awac.js" type="text/javascript"></script>
+    <script src="test.js" type="text/javascript"></script>
+    <script type="text/javascript">
+			var _awac = null;
+
+			function onAction(action) {
+			  if ('back' == action) {
+			     _awac.endPage();
+			  }
+			}
+			
+			$(document).ready(function() {
+			  _awac = new Awac('_awac');
+			  var colors = _awac.getInitParam();
+			  console.log('got init param='+colors);
+			  _awac.setOnAction(onAction);
+			  _awac.setHomeItem({'label':'Back','icon':'close','action':'back'});
+			  _awac.setPageColors(colors);
+			  setButton($('#savebtn'),function() { _awac.setAppColors(colors); _awac.endPage(); });
+			  _awac.startPage();
+			});
+
+    </script>
+</head>
+<body>
+<div id="content">
+    <p>If you pefer the look of these colors then just click on 'Save Colors' and they will be set application wide.</p>
+
+    <div class="holder">
+        <button class="topb" id="savebtn"><span>Save Colors</span></button>
+    </div>
+
+    <p><i>Note: this is not a complete theming of the app. For example trying to pull-to-refresh will display
+        colors based on the original theme</i></p>
+
+    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec condimentum, turpis et dignissim consectetur,
+        magna metus porttitor neque, eget consectetur ex tortor at elit. Sed non convallis sapien. Duis mollis lectus
+        pulvinar semper consectetur. Quisque dapibus, augue eget pretium finibus, libero est posuere dolor, eget varius
+        magna risus at dolor. Quisque dapibus velit in purus ultricies, sit amet gravida orci vulputate. Praesent sem
+        elit, ultrices ut lacinia vel, condimentum vel dui. Maecenas tincidunt magna lobortis ipsum dapibus aliquam.
+        Praesent hendrerit, enim vel iaculis auctor, libero nulla imperdiet ipsum, sed faucibus dolor sem quis nunc.
+        Fusce porttitor suscipit sem, sit amet luctus nibh finibus vel. Vivamus luctus massa ac lacus molestie dapibus.
+        Sed varius ullamcorper mi, et posuere dolor dignissim id. Integer malesuada ex semper odio tempor laoreet.</p>
+
+    <p>Cras commodo velit at sapien euismod, id viverra ligula iaculis. Cras vulputate non purus hendrerit faucibus.
+        Cras convallis sodales ante sed ultrices. Curabitur ornare convallis nunc in maximus. Duis at justo id turpis
+        commodo malesuada. Duis auctor rhoncus diam, non elementum nibh tristique at. Sed feugiat scelerisque viverra.
+        Maecenas gravida finibus erat eu imperdiet. Donec vel mauris id massa laoreet euismod. Aliquam tempor leo a
+        neque tristique, eget facilisis diam ornare. In at est quis enim tincidunt bibendum ac quis nisi. Sed lobortis
+        volutpat molestie. Maecenas luctus congue augue at semper. Sed commodo lorem nec efficitur aliquet. Vestibulum
+        ut elit augue. Integer blandit magna et bibendum ultrices.</p>
+
+    <p>Sed felis erat, aliquam pulvinar pretium non, vestibulum sit amet eros. Ut id mi suscipit, interdum turpis eget,
+        sollicitudin arcu. Nullam faucibus auctor ante nec faucibus. Donec semper nibh ut elit consectetur, sit amet
+        sagittis orci semper. Praesent sodales lacus ut condimentum porttitor. Pellentesque neque urna, pharetra
+        consectetur bibendum varius, posuere a sem. Ut neque nisl, scelerisque non accumsan id, condimentum vel felis.
+        Maecenas rutrum tristique quam, nec condimentum arcu tincidunt in. Nam vel dignissim nisi. Aliquam egestas
+        finibus mi, non condimentum massa ullamcorper nec. Morbi viverra ac mi at aliquam. Nulla sagittis dolor nec arcu
+        sagittis, eu malesuada mi sagittis. In tristique neque eget justo fermentum ultrices.</p>
+
+    <p>Suspendisse malesuada cursus dolor, a dictum dolor ultricies in. Suspendisse dui libero, tristique in justo eget,
+        cursus cursus purus. Praesent dui arcu, porta in elit eget, euismod tristique quam. Cras sed ultricies mauris.
+        Vivamus eu purus a ex hendrerit consequat a sit amet justo. Sed mattis lectus sit amet sem hendrerit venenatis.
+        Proin porta interdum enim sit amet maximus.</p>
+
+    <p>Integer scelerisque lacinia vulputate. Aenean molestie ipsum neque, eget blandit urna vestibulum eu. Nunc nibh
+        urna, posuere porttitor tortor auctor, ultricies elementum ante. Morbi elementum pulvinar condimentum. Quisque
+        pretium, quam et posuere tempus, odio lacus sollicitudin dolor, in rhoncus purus eros eu ante. Ut iaculis dictum
+        neque a faucibus. Suspendisse hendrerit nibh neque, a efficitur nisl semper in. Proin vulputate risus et feugiat
+        bibendum. Vestibulum eu condimentum neque, a cursus risus. Curabitur tincidunt fermentum quam et vestibulum. Sed
+        id velit mattis, malesuada tellus eget, convallis lacus. Nulla fringilla at massa nec consectetur. Suspendisse
+        auctor eget mauris a hendrerit.</p>
+</div>
+</body>
+</html>

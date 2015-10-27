@@ -15,8 +15,9 @@ $(document).ready(function() {
   _awac.setOnAction(showPage);
   _awac.unlockNavDrawer();
   setButton($('#samplebtn'),function() { 
-		_awac.openPage('wizard','http://acuth.github.io/sample/wizard1.html');
+		_awac.openPage('wizard','../sample/wizard1.html');
 	});
+	_awac.makeBackgroundRequest('new-page');
   loadFooter();
   _awac.startPage();
 });
@@ -25,21 +26,24 @@ $(document).ready(function() {
 	<body>
 	  <div id="details"><div id="details-footer"></div><div id="details-blurb">
 		  <div>In the sample pages we create a global variable to represent Awac called _awac.</div>
-		  <div class="code">
-			  _awac = new Awac('_awac');
-			  ...
-			  _awac.replacePage('wizard','wizard2.html',null,true);
+		  <div class="code"><pre>
+       _awac = new Awac('_awac');
+       ...
+       _awac.replacePage('wizard','wizard2.html',null,true);
+       </pre>
 		  </div>
-	     These pages provide some examples of how to use Awac. Each page includes a link to view the page outside of the app.
     </div><!-- end of details-blurb --> </div><!-- end of details -->
 
     <div id="navigation"></div>
 
     <div id="content">
-	    <p>As well as pushing and popping pages on the stack, Awac allows you to replace the page on the top of the stack with a 'next' or 'previous' page.
+		<p>As well as pushing and popping pages on the stack, Awac allows you to replace the page on the top of the
+			stack with a 'next' or 'previous' page.
 			The sample pages (see below) uses this approach to present a wizard like interface to the user.</p>
 
-      <div class="holder"><button class="topb" id="samplebtn"><span>Sample Page</span></button></div>
+		<div class="holder">
+			<button class="topb" id="samplebtn"><span>Sample Page</span></button>
+		</div>
     </div>
 	</body>
 </html>

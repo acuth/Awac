@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+    <link type="text/css" rel="stylesheet" href="test.css"/>
+    <script src="../js/jquery.min.js" type="text/javascript"></script>
+    <script src="../js/dateformat.js" type="text/javascript"></script>
+    <script src="../awac/awac.js" type="text/javascript"></script>
+    <script src="test.js" type="text/javascript"></script>
+    <script type="text/javascript">
+var _awac = null;
+$(document).ready(function() {
+  _awac = new Awac('_awac');
+  _awac.setOnAction(showPage);
+  _awac.unlockNavDrawer();
+  setButton($('#start-background'),function() { 
+    _awac.startBackground('background.html');
+    pLog('background task starting');
+  });
+  setButton($('#stop-background'),function() { 
+    _awac.stopBackground();
+    pLog('background task stopping');
+  });
+  setButton($('#new-page'),function() { 
+    pLog('fake new page');
+    _awac.makeBackgroundRequest('new-page');
+  });
+  setButton($('#get-background-status'),function() { 
+    pLog('getting background status');
+    _awac.getBackgroundResponse('status',function(resp) { pLog(resp); });
+  });
+  _awac.makeBackgroundRequest('new-page');
+  loadFooter(true);
+  _awac.startPage();
+});
+
+    </script>
+</head>
+<body>
+<div id="details">
+    <div id="details-footer"></div>
+    <div id="details-blurb">
+        <div>Awac allows a background task to be run for the app which can recieve requests from (and send responses to)
+            the current page.
+        </div>
+        <div class="code"><pre>
+       _awac = new Awac('_awac');
+       ...
+       _awac.startBackground('background.html');
+       ...
+       _awac.makeBackgroundRequest('new-page');
+       ...
+       _awac.getBackgroundResponse('status',
+          function(resp) { });
+       </pre>
+        </div>
+    </div>
+    <!-- end of details-blurb --> </div>
+<!-- end of details -->
+
+<div id="navigation"></div>
+
+<div id="content">
+    <p>Awac allows an app to define a long-running background task that can be communicated with by the current page.
+        The background task is defined by an html file that is never made visible.</p>
+
+    <div class="holder">
+        <button class="topb" id="start-background"><span>Start Background</span></button>
+        <button id="stop-background"><span>Stop Background</span></button>
+        <button id="new-page"><span>Fake New Page</span></button>
+        <button id="get-background-status"><span>Show Status</span></button>
+    </div>
+</div>
+</body>
+</html>

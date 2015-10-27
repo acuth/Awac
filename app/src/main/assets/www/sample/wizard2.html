@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+    <style type="text/css">
+        body {
+        background: #678;
+        margin: 0;
+        padding: 0;
+        }
+
+        #content {
+        margin-top: 120px;
+        margin-left: auto;
+        margin-right: auto;
+        margin-bottom: 120px;
+        width: 50%;
+        text-align: center;
+        color: white;
+        font-size: 200%;
+        }
+
+        #calltoaction {
+        position: absolute;
+        width: 100%;
+        }
+
+        #calltoaction div {
+        -webkit-border-radius: 4px;
+        margin: 60px;
+        padding: 10px;
+        background: white;
+        color: #303840;
+        text-align: center;
+        }
+
+    </style>
+    <script src="../js/jquery.min.js" type="text/javascript"></script>
+    <script src="../awac/awac.js" type="text/javascript"></script>
+    <script type="text/javascript">
+			var _awac = null;
+			function onAction(action) {
+			  if ('back' == action) onBackPressed();
+			  if ('skip' == action) _awac.replacePage('wizard','wizard3.html',null,true);
+			}
+			function onBackPressed() {
+			  _awac.replacePage('wizard','wizard1.html',null,false);
+			}
+			function revealCallToAction() {
+			  var cta = $('#calltoaction');
+			  cta.show().css('top',(_awac.getDims().height-cta.height())+'px');
+			}
+			$(document).ready(function() {
+			  _awac = new Awac('_awac');
+			  _awac.setOnAction(onAction);
+			  _awac.setOnBackPressed(onBackPressed);	 
+			  _awac.setHomeItem({'label':'Back','icon':'arrow_back','action':'back'});
+			  _awac.addActionBarItem({'label':'SKIP','action':'skip'});
+			  $('#calltoaction').on('click',function(){_awac.alert('Sorry, but this call to action has not yet been implemented');});
+			  _awac.startPage();
+			  setTimeout(revealCallToAction,60);
+			});
+
+    </script>
+</head>
+<body>
+<div id="content">Awac can be used to do all sorts of things</div>
+<div id="calltoaction" style="display:none">
+    <div>DO SOMETHING FANTASTIC</div>
+</div>
+</body>
+</html>

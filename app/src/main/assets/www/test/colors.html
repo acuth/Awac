@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+    <link type="text/css" rel="stylesheet" href="test.css"/>
+    <script src="../js/jquery.min.js" type="text/javascript"></script>
+    <script src="../js/dateformat.js" type="text/javascript"></script>
+    <script src="../awac/awac.js" type="text/javascript"></script>
+    <script src="test.js" type="text/javascript"></script>
+    <script type="text/javascript">
+var _awac = null;
+
+function setButtonColor(id,primary,text_primary,primary_dark) {
+  var btn = $('#'+id);
+  var h = '<span style="border:solid 1px gray;margin-top:4px;display:inline-block;width:32px;height:32px;background:'+primary+'">&nbsp;</span>';
+  h += '<span style="border:solid 1px gray;margin-top:4px;display:inline-block;width:32px;height:32px;background:'+primary_dark+'">&nbsp;</span>';
+  h += '<span style="border:solid 1px gray;margin-top:4px;display:inline-block;width:32px;height:32px;background:'+text_primary+'">&nbsp;</span>';
+  btn.html(h);
+  setButton(btn,function() { 
+    var colors = {'primary':primary,'text_primary':text_primary,'primary_dark':primary_dark};
+	  _awac.openPage('lorem','color_lorem.html',colors);
+  });
+}
+
+$(document).ready(function() {
+  _awac = new Awac('_awac');
+  _awac.setOnAction(showPage);
+  _awac.unlockNavDrawer();
+  setButtonColor('btn1','#607D8B','#FFFFFF','#455A64');
+  setButtonColor('btn2','#FF9800','#FFFFFF','#F57C00');
+  setButtonColor('btn3','#009688','#FFFFFF','#00695c');
+  setButtonColor('btn4','#F8F8F8','#455A64','#A5A5A5');
+  loadFooter();
+  _awac.startPage();
+});
+
+    </script>
+</head>
+<body>
+<div id="details">
+    <div id="details-footer"></div>
+    <div id="details-blurb">
+        <div>Using the global variable _awac we can set colors for either a page or the app as a whole.</div>
+        <div class="code"><pre>
+       _awac = new Awac('_awac');
+       ...
+       _awac.setPageColors({'primary':'#f5f5f5','text_primary':'#666666','primary_dark':'#222222'});
+       </pre>
+        </div>
+    </div>
+    <!-- end of details-blurb --> </div>
+<!-- end of details -->
+
+<div id="navigation"></div>
+
+<div id="content">
+    <p>As well as pushing and popping pages on the stack, Awac allows you to replace the page on the top of the stack
+        with a 'next' or 'previous' page.
+        The sample pages (see below) uses this approach to present a wizard like interface to the user.</p>
+
+    <div class="holder">
+        <button class="topb" id="btn1"></button>
+        <button id="btn2"></button>
+        <button id="btn3"></button>
+        <button id="btn4"></button>
+    </div>
+</div>
+</body>
+</html>

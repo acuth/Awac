@@ -1,0 +1,28 @@
+<html>
+<head>
+    <script src="awac.js" type="text/javascript"></script>
+    <script type="text/javascript">
+ var _awac = null;
+ var _n = 0;
+
+ function doOnLoad() {
+    _awac = new Awac('_awac');
+    _awac.setOnMessage(onMessage);
+    console.log('------ background page loaded');
+ }
+
+ function onMessage(msg) {
+    _n++;
+    var n = _n;
+    console.log('------ got message '+n+' [['+msg+']]');
+    setTimeout(function() {
+        console.log('------ sending response '+n);
+        _awac.sendMessage(n+'. got message '+msg);
+    },5000);
+ }
+
+    </script>
+</head>
+<body onload="doOnLoad();">
+</body>
+</html>

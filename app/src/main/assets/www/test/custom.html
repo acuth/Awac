@@ -34,6 +34,7 @@ $(document).ready(function() {
   setButton($('#latest-intro'),function() { runApp('http://acuth.github.io/test/index.html'); });
   setButton($('#local-intro'),function() { runApp('file:///android_asset/www/test/index.html'); });
   $('#url').val(_awac.load('test_custom_url'));
+  _awac.makeBackgroundRequest('new-page');
   loadFooter();
   _awac.startPage();
 });

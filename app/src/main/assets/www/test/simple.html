@@ -15,8 +15,9 @@
 			  _awac.unlockNavDrawer();
 			  setButton($('#samplebtn'),function() { 
 			    pLog('open sample page');
-			    _awac.openPage('sample','http://acuth.github.io/sample/highline.html');
+			    _awac.openPage('sample','../sample/highline.html');
 			  });
+			  _awac.makeBackgroundRequest('new-page');
 			  loadFooter();
 			  _awac.startPage();
 			});

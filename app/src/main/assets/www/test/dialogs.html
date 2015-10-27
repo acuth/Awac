@@ -27,6 +27,7 @@ $(document).ready(function() {
   setButton($('#show-alert'),function() { 
     _awac.alert('This is what an alert looks like');
   });
+  _awac.makeBackgroundRequest('new-page');
 	loadFooter(true);
   _awac.startPage();
 });
@@ -35,11 +36,12 @@ $(document).ready(function() {
 	<body>
 	  <div id="details"><div id="details-footer"></div><div id="details-blurb">
           <div>In this example we create a global variable to represent Awac called _awac.</div>
-          <div class="code">
+          <div class="code"><pre>
        _awac = new Awac('_awac');
-              _awac.dialog('Is this a question?','yes','no',
-              function(yes){...});
-              _awac.alert('This is what an alert looks like');
+       _awac.dialog('Is this a question?','yes','no',
+          function(yes){...});
+       _awac.alert('This is what an alert looks like'); 
+       </pre>
           </div>
     </div><!-- end of details-blurb --></div><!-- end of details -->
 

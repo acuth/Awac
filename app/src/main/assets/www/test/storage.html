@@ -3,11 +3,11 @@
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-        <link type="text/css" rel="stylesheet" href="test.css"/>
+      <link type="text/css" rel="stylesheet" href="test.css"/>
 		<script src="../js/jquery.min.js" type="text/javascript"></script>
 		<script src="../js/dateformat.js" type="text/javascript"></script>
-        <script src="../awac/awac.js" type="text/javascript"></script>
-        <script src="test.js" type="text/javascript"></script>
+      <script src="../awac/awac.js" type="text/javascript"></script>
+      <script src="test.js" type="text/javascript"></script>
 		<script type="text/javascript">
 var _awac = null;
 
@@ -48,6 +48,7 @@ $(document).ready(function() {
   _awac = new Awac('_awac');
   _awac.setOnAction(onAction);
   _awac.unlockNavDrawer();
+  _awac.makeBackgroundRequest('new-page');
   loadFooter(true);
   _awac.startPage();
 });
@@ -55,8 +56,8 @@ $(document).ready(function() {
 	</head>
 	<body>
 	  <div id="details"><div id="details-footer"></div><div id="details-blurb">
-          <div>In this example we create a global variable to represent Awac called _awac.</div>
-          <div class="code"><pre>
+        <div>In this example we create a global variable to represent Awac called _awac.</div>
+        <div class="code"><pre>
        _awac = new Awac('_awac');
        ...
        x = ['red','green','blue'];
@@ -64,13 +65,14 @@ $(document).ready(function() {
        ...
        x = _awac.get('x');
        </pre>
-          </div>
+        </div>
 	  </div><!-- end of details-blurb --></div><!-- end of details -->
 
     <div id="navigation"></div>
     
     <div id="content">
-  	  <p>Awac provides both persistent and session name-value storage where values can be Javascript primitives, objects and arrays.</p>
+      <p>Awac provides both persistent (store/load) and session (set/get) name-value storage where values can be
+        Javascript primitives, objects and arrays.</p>
     
       <div class="holder">
         <div class="grid btn lite" onclick="onAction('store_null');">NULL</div>
